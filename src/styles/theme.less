@@ -1,0 +1,128 @@
+/* 深色模式变量 */
+:root {
+  --background-color: #f7f8fa;
+  --card-background: #ffffff;
+  --text-color: #333;
+  --text-color-secondary: #666;
+  --text-color-placeholder: #999;
+  --border-color: #eee;
+  --primary-color: #e53e3e;
+  --blue: #40a9ff;
+  --green: #52c41a;
+  --orange: #faad14;
+  --gray: #999;
+  --gray-light: #f5f5f5;
+  --gray-dark: #666;
+  --divider-color: #f2f3f5;
+  --nav-bar-background: #ffffff;
+  --popup-background: #ffffff;
+}
+
+/* 深色模式 */
+:root[data-theme='dark'],
+.dark {
+  --background-color: #121212;
+  --card-background: #1e1e1e;
+  --text-color: #f5f5f5;
+  --text-color-secondary: #aaaaaa;
+  --text-color-placeholder: #666666;
+  --border-color: #333333;
+  --primary-color: #ff6b6b;  /* 调亮主色调 */
+  --blue: #59b6ff;
+  --green: #73d13d;
+  --orange: #ffc53d;
+  --gray: #666666;
+  --gray-light: #333333;
+  --gray-dark: #999999;
+  --divider-color: #333333;
+  --nav-bar-background: #1e1e1e;
+  --popup-background: #1e1e1e;
+}
+
+/* Vant组件深色模式 */
+:root[data-theme='dark'],
+.dark {
+  /* 全局 */
+  --van-black: var(--text-color);
+  --van-white: var(--card-background);
+  --van-gray-1: #1e1e1e;
+  --van-gray-2: #2c2c2c;
+  --van-gray-3: #373737;
+  --van-gray-4: #444;
+  --van-gray-5: #555;
+  --van-gray-6: #666;
+  --van-gray-7: #777;
+  --van-gray-8: #888;
+  
+  /* 文本 */
+  --van-text-color: var(--text-color);
+  --van-text-color-2: var(--text-color-secondary);
+  --van-text-color-3: var(--text-color-placeholder);
+  
+  /* 背景 */
+  --van-background: var(--background-color);
+  --van-background-2: var(--card-background);
+  --van-background-3: #2c2c2c;
+  
+  /* 边框 */
+  --van-border-color: var(--border-color);
+  
+  /* van-cell */
+  --van-cell-background: var(--card-background);
+  --van-cell-text-color: var(--text-color);
+  --van-cell-border-color: var(--border-color);
+  --van-cell-active-color: #2c2c2c;
+  --van-cell-value-color: var(--text-color-secondary);
+  --van-cell-group-background: var(--background-color);
+  --van-cell-group-title-color: var(--text-color-secondary);
+  
+  /* van-button */
+  --van-button-default-background: var(--card-background);
+  --van-button-default-border-color: var(--border-color);
+  --van-button-default-color: var(--text-color);
+  
+  /* van-nav-bar */
+  --van-nav-bar-background: var(--nav-bar-background);
+  --van-nav-bar-title-text-color: var(--text-color);
+  --van-nav-bar-icon-color: var(--text-color);
+  --van-nav-bar-text-color: var(--text-color);
+  
+  /* van-popup */
+  --van-popup-background: var(--popup-background);
+  
+  /* van-switch */
+  --van-switch-background: #333;
+  --van-switch-on-background: var(--primary-color);
+  
+  /* van-radio */
+  --van-radio-checked-icon-color: var(--primary-color);
+  
+  /* van-checkbox */
+  --van-checkbox-checked-icon-color: var(--primary-color);
+  
+  /* van-tab */
+  --van-tab-text-color: var(--text-color-secondary);
+  --van-tab-active-text-color: var(--primary-color);
+  --van-tab-background: var(--card-background);
+  --van-tabs-bottom-bar-color: var(--primary-color);
+  --van-tabs-nav-background: var(--card-background);
+  
+  /* van-tabbar */
+  --van-tabbar-background: var(--card-background);
+  --van-tabbar-item-text-color: var(--text-color-secondary);
+  --van-tabbar-item-active-color: var(--primary-color);
+  
+  /* van-card */
+  --van-card-background: var(--card-background);
+  --van-card-text-color: var(--text-color);
+  --van-card-price-color: var(--primary-color);
+  
+  /* van-dialog */
+  --van-dialog-background: var(--card-background);
+  --van-dialog-text-color: var(--text-color);
+  
+  /* 其他 */
+  --van-active-color: #2c2c2c;
+  --van-toast-background: rgba(30, 30, 30, 0.9);
+  --van-toast-text-color: var(--text-color);
+} 

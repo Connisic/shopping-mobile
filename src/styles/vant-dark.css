@@ -1,0 +1,81 @@
+/* Vant深色模式样式覆盖 */
+.dark {
+  /* 全局背景和文字颜色 */
+  --van-black: #f5f5f5;
+  --van-background: #121212;
+  --van-background-2: #1e1e1e;
+  --van-active-color: #373737;
+  --van-text-color: #f5f5f5;
+  --van-text-color-2: #aaaaaa;
+  --van-text-color-3: #666666;
+  --van-border-color: #333333;
+  
+  /* Cell组件 */
+  --van-cell-group-background: transparent;
+  --van-cell-background: #1e1e1e;
+  --van-cell-border-color: #333333;
+  --van-cell-text-color: #f5f5f5;
+  --van-cell-value-color: #aaaaaa;
+  --van-cell-active-color: #2c2c2c;
+  
+  /* 导航栏 */
+  --van-nav-bar-background: #1e1e1e;
+  --van-nav-bar-title-text-color: #f5f5f5;
+  --van-nav-bar-icon-color: #f5f5f5;
+  --van-nav-bar-text-color: #f5f5f5;
+  
+  /* 标签栏 */
+  --van-tabbar-background: #1e1e1e;
+  --van-tabbar-item-text-color: #aaaaaa;
+  --van-tabbar-item-active-color: #ff6b6b;
+  
+  /* 按钮 */
+  --van-button-default-background: #1e1e1e;
+  --van-button-default-border-color: #333333;
+  --van-button-default-color: #f5f5f5;
+  
+  /* 开关 */
+  --van-switch-background: #333333;
+  --van-switch-on-background: #ff6b6b;
+  
+  /* 弹出层 */
+  --van-popup-background: #1e1e1e;
+  
+  /* 表单元素 */
+  --van-field-input-text-color: #f5f5f5;
+  --van-field-placeholder-text-color: #666666;
+  --van-field-error-text-color: #ff6b6b;
+  
+  /* 单选框 */
+  --van-radio-checked-icon-color: #ff6b6b;
+  
+  /* 卡片 */
+  --van-card-background: #1e1e1e;
+  --van-card-text-color: #f5f5f5;
+  --van-card-price-color: #ff6b6b;
+  
+  /* 对话框 */
+  --van-dialog-background: #1e1e1e;
+  --van-dialog-text-color: #f5f5f5;
+  
+  /* 标签页 */
+  --van-tab-text-color: #aaaaaa;
+  --van-tab-active-text-color: #ff6b6b;
+  --van-tabs-bottom-bar-color: #ff6b6b;
+  --van-tabs-nav-background: #1e1e1e;
+  
+  /* 通知栏 */
+  --van-notify-text-color: #f5f5f5;
+  --van-notify-primary-background: #ff6b6b;
+  
+  /* 轻提示 */
+  --van-toast-background: rgba(30, 30, 30, 0.9);
+  --van-toast-text-color: #f5f5f5;
+  
+  /* 徽标 */
+  --van-badge-background: #ff6b6b;
+  --van-badge-text-color: #f5f5f5;
+  
+  /* 复选框 */
+  --van-checkbox-checked-icon-color: #ff6b6b;
+} 
