@@ -6,6 +6,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
     <link rel="icon" href="<%= BASE_URL %>logo.svg">
     <title>YY电商 - 移动端商城</title>
+    <style>
+      /* 全局禁用触摸高亮和文本选择 */
+      * {
+        -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+      }
+      
+      /* 交互元素特别处理 */
+      a, button, [role="button"], [class*="-tab"], [class*="-item"],
+      [tabindex], [clickable], [class*="van-"] {
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-touch-callout: none !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        outline: none !important;
+      }
+      
+      /* 恢复输入框的文本选择 */
+      input, textarea, [contenteditable="true"] {
+        -webkit-user-select: text !important;
+        user-select: text !important;
+      }
+      
+      /* 强制覆盖Vant绿色为红色主题 */
+      :root {
+        --primary-color: #ff0000;
+        --primary-color-dark: #cc0000;
+        --background-light: #fff0f0;
+        
+        --van-primary-color: var(--primary-color) !important;
+        --van-success-color: var(--primary-color) !important;
+        --van-danger-color: var(--primary-color) !important;
+        --van-green: var(--primary-color) !important;
+        --van-button-primary-background: var(--primary-color) !important;
+        --van-button-primary-border-color: var(--primary-color) !important;
+        --van-button-success-background: var(--primary-color) !important;
+        --van-button-success-border-color: var(--primary-color) !important;
+      }
+      
+      /* 覆盖搜索栏背景色 */
+      .search-bar, .van-search, .search-header {
+        background-color: var(--primary-color) !important;
+      }
+      
+      /* 覆盖tabbar激活项颜色 */
+      .van-tabbar-item--active {
+        color: var(--primary-color) !important;
+      }
+    </style>
   </head>
   <body>
     <noscript>

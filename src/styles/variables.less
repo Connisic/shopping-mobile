@@ -1,10 +1,27 @@
-// 主题色
-@red: #e53e3e;
-@primary-color: #e53e3e;
+// 品牌颜色
+@brand-color: #ff0000; // 主品牌红色
+@brand-color-dark: darken(@brand-color, 10%); // 深一级主题色 #cc0000
+@brand-color-light: lighten(@brand-color, 30%); // 浅一级主题色 #ff9999
+
+// 向后兼容，保留原有变量名
+@red: @brand-color; // 兼容旧代码中使用的 @red 变量
+
+// 主题色映射
+@primary-color: @brand-color;
+@success-color: @brand-color; // 成功色（覆盖默认绿色）
+@warning-color: #faad14; // 警告色
+@danger-color: @brand-color; // 危险色
+@info-color: #40a9ff; // 信息色
+
+// 社交平台颜色
+@wechat-color: @brand-color; // 微信绿色（已被覆盖为主题红色）
+@alipay-color: #1677ff; // 支付宝蓝色
+@qq-color: #0085FF; // QQ蓝色
+@weibo-color: #E6162D; // 微博红色
 
 // 辅助色
 @blue: #40a9ff;
-@green: #52c41a;
+@green: @brand-color; // 覆盖默认绿色为主题红色
 @orange: #faad14;
 @gray: #999;
 @gray-light: #f5f5f5;
@@ -17,6 +34,17 @@
 
 // 边框颜色
 @border-color: #eee;
+
+// 背景颜色
+@background-color: #f7f8fa;
+@card-background: #ffffff;
+
+// 状态颜色
+@status-pending: #ff976a; // 待付款
+@status-paid: #1989fa;    // 待发货
+@status-delivered: @brand-color; // 待收货
+@status-completed: #969799; // 已完成
+@status-cancelled: #969799; // 已取消
 
 // 间距
 @space-xs: 4px;

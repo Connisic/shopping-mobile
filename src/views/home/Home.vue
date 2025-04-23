@@ -25,10 +25,11 @@
         :key="index"
         :class="['tab', { active: activeTab === index }]"
         @click="activeTab = index"
+        style="-webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;"
       >
         {{ tab }}
       </div>
-      <div class="tab">
+      <div class="tab" style="-webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;">
         <van-icon name="more-o" />
       </div>
     </div>
@@ -47,7 +48,7 @@
     <div class="coupon-bar">
       <van-icon name="coupon-o" class="mr-2" />
       <span class="text-sm">新人专享 | 全场满300减30</span>
-      <van-button size="mini" class="ml-auto" color="#ff524a" plain>立即领取</van-button>
+      <van-button size="mini" class="ml-auto" :color="themeColor" plain>立即领取</van-button>
     </div>
 
     <!-- 限时秒杀 -->
@@ -144,7 +145,7 @@
 <script>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useProductStore, useSeckillStore } from '@/stores'
 import ProductCard from '@/components/ProductCard.vue'
 import LoadMore from '@/components/LoadMore.vue'
 
@@ -156,7 +157,8 @@ export default {
   },
   setup() {
     const router = useRouter()
-    const store = useStore()
+    const productStore = useProductStore()
+    const seckillStore = useSeckillStore()
     
     const keyword = ref('')
     const activeTab = ref(1)
@@ -166,6 +168,7 @@ export default {
     const products = ref([])
     
     const tabs = ['关注', '推荐', '小时达', '数码日', '国补', '穿搭']
+    const themeColor = '#e53e3e' // 主题色
     
     const categories = [
       { id: 1, name: 'YY直播', icon: 'video-o', bgColor: 'bg-red' },
@@ -180,9 +183,9 @@ export default {
       { id: 10, name: '更多分类', icon: 'apps-o', bgColor: 'bg-purple' }
     ]
     
-    // 从store获取秒杀数据
-    const countdown = computed(() => store.getters['seckill/countdown'])
-    const seckillProducts = computed(() => store.getters['seckill/homeSeckillProducts'])
+    // 从Pinia store获取秒杀数据
+    const countdown = computed(() => seckillStore.countdown)
+    const seckillProducts = computed(() => seckillStore.homeSeckillProducts)
     
     // 定时更新倒计时
     let timer = null
@@ -190,16 +193,16 @@ export default {
     // 开始倒计时
     const startCountdown = () => {
       // 立即执行一次
-      store.dispatch('seckill/updateCountdown')
+      seckillStore.updateCountdown()
       // 设置定时器，每秒更新一次
       timer = setInterval(() => {
-        store.dispatch('seckill/updateCountdown')
+        seckillStore.updateCountdown()
       }, 1000)
     }
     
     onMounted(() => {
       // 加载秒杀商品数据
-      store.dispatch('seckill/fetchSeckillProducts')
+      seckillStore.fetchSeckillProducts()
       // 开始倒计时
       startCountdown()
       // 加载推荐商品
@@ -249,7 +252,7 @@ export default {
       loading.value = true
       
       try {
-        const res = await store.dispatch('product/fetchProducts', {
+        const res = await productStore.fetchProducts({
           page: products.value.length / 10 + 1,
           pageSize: 10
         })
@@ -284,6 +287,7 @@ export default {
       finished,
       countdown,
       formatTime,
+      themeColor,
       goToSearch,
       goToMore,
       goToSeckill,
@@ -388,17 +392,17 @@ export default {
         
         &.bg-green {
           background-color: #ecfdf5;
-          color: #10b981;
+          color: @primary-color;
         }
         
         &.bg-blue {
           background-color: #eff6ff;
-          color: #3b82f6;
+          color: @primary-color;
         }
         
         &.bg-purple {
           background-color: #f5f3ff;
-          color: #8b5cf6;
+          color: @primary-color;
         }
       }
       
@@ -459,7 +463,7 @@ export default {
         .text {
           font-size: 16px;
           font-weight: bold;
-          color: #ee0a24;
+          color: @primary-color;
           margin-right: 8px;
         }
         
@@ -483,7 +487,7 @@ export default {
               height: 24px;
               line-height: 24px;
               text-align: center;
-              background-color: #ee0a24;
+              background-color: @primary-color;
               color: #fff;
               font-size: 14px;
               font-weight: bold;
@@ -492,7 +496,7 @@ export default {
             
             .colon {
               margin: 0 2px;
-              color: #ee0a24;
+              color: @primary-color;
               font-weight: bold;
             }
           }
@@ -535,7 +539,7 @@ export default {
           margin-top: 8px;
           
           .current {
-            color: #ee0a24;
+            color: @primary-color;
             font-size: 16px;
             font-weight: bold;
           }
@@ -648,5 +652,33 @@ export default {
   :deep(.van-tabbar-item--active) {
     color: @primary-color;
   }
+}
+</style>
+
+<style scoped>
+/* 修复标签选项的触摸高亮问题 */
+.tab-bar .tab {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  tap-highlight-color: transparent !important;
+  outline: none !important;
+  cursor: pointer;
+  -webkit-touch-callout: none !important;
+}
+
+/* 禁用文本选择和触摸高亮效果 */
+* {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* 保留文本选择的元素 */
+input, textarea, .text-selectable {
+  -webkit-user-select: text;
+  user-select: text;
 }
 </style> 

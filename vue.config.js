@@ -1,27 +1,32 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
+  lintOnSave: false,
   css: {
     loaderOptions: {
       less: {
         lessOptions: {
           modifyVars: {
-            'red': '#e53e3e',
-            'primary-color': '#e53e3e'
-          }
-        }
-      }
-    }
+            'primary-color': "#00b683",
+            // 'link-color': '#1DA57A',
+            // 'border-radius-base': '2px',
+          },
+          javascriptEnabled: true,
+        },
+      },
+    },
   },
   devServer: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8090', // 后端服务地址，根据实际情况修改
-        changeOrigin: true,
-        pathRewrite: {
-          '^/api': '' // 将/api前缀重写为空
-        }
-      }
-    }
+    port: 8081,   
+    // 代理服务器
+	proxy: {
+		'/': {
+			target: 'http://www.yyshopping.com/',
+			changeOrigin: true,  
+				// pathRewrite: {
+				//   '^/api': ''  
+				// }
+		}
+	}
   }
 })

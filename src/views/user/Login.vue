@@ -16,7 +16,7 @@
       </div>
       
       <!-- 登录方式切换 -->
-      <van-tabs v-model:active="activeTab" animated>
+      <van-tabs v-model:active="activeTab" animated @change="onTabChange">
         <!-- 密码登录 -->
         <van-tab title="密码登录">
           <van-form @submit="onPasswordSubmit">
@@ -27,6 +27,7 @@
                 label="用户名"
                 placeholder="请输入用户名/手机号"
                 :rules="[{ required: true, message: '请输入用户名/手机号' }]"
+                ref="usernameFieldRef"
               />
               <van-field
                 v-model="passwordForm.password"
@@ -70,6 +71,7 @@
                   { required: true, message: '请输入手机号' },
                   { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确' }
                 ]"
+                ref="phoneFieldRef"
               />
               <van-field
                 v-model="smsForm.checkCode"
@@ -117,15 +119,15 @@
         </div>
         <div class="social-login">
           <div class="social-item">
-            <van-icon name="wechat" size="24" color="#07C160" />
+            <van-icon name="wechat" size="24" color="var(--wechat-color)" />
             <span>微信</span>
           </div>
           <div class="social-item">
-            <van-icon name="weibo" size="24" color="#E6162D" />
+            <van-icon name="weibo" size="24" color="var(--weibo-color)" />
             <span>微博</span>
           </div>
           <div class="social-item">
-            <van-icon name="qq" size="24" color="#0085FF" />
+            <van-icon name="qq" size="24" color="var(--qq-color)" />
             <span>QQ</span>
           </div>
         </div>
@@ -135,18 +137,17 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Toast } from 'vant'
-import { useStore } from 'vuex'
-import userAPI from '@/services/user'
+import { useUserStore } from '@/stores/userStore'
 
 export default {
   name: 'LoginPage',
   setup() {
     const router = useRouter()
     const route = useRoute()
-    const store = useStore()
+    const userStore = useUserStore()
     
     // 登录方式标签页
     const activeTab = ref(0)
@@ -167,9 +168,40 @@ export default {
     const passwordLoginLoading = ref(false)
     const smsLoginLoading = ref(false)
     
+    // 输入框引用
+    const usernameFieldRef = ref(null)
+    const phoneFieldRef = ref(null)
+    
     // 验证码倒计时
     const countDown = ref(0)
     let timer = null
+    
+    // 在组件挂载后自动聚焦到第一个输入框
+    onMounted(() => {
+      // 确保DOM已经渲染完成
+      nextTick(() => {
+        // 根据当前激活的标签页，聚焦到相应的输入框
+        focusActiveInput()
+      })
+    })
+    
+    // 聚焦到当前标签页的第一个输入框
+    const focusActiveInput = () => {
+      if (activeTab.value === 0 && usernameFieldRef.value) {
+        // 密码登录标签页，聚焦到用户名输入框
+        usernameFieldRef.value.focus()
+      } else if (activeTab.value === 1 && phoneFieldRef.value) {
+        // 验证码登录标签页，聚焦到手机号输入框
+        phoneFieldRef.value.focus()
+      }
+    }
+    
+    // 标签页切换时，聚焦到相应的输入框
+    const onTabChange = () => {
+      nextTick(() => {
+        focusActiveInput()
+      })
+    }
     
     // 返回上一页
     const onClickLeft = () => {
@@ -191,7 +223,7 @@ export default {
       
       // 发送验证码
       try {
-        await store.dispatch('user/getVerifyCode', smsForm.value.phone)
+        await userStore.getVerifyCode(smsForm.value.phone)
         Toast.success('验证码已发送')
         
         // 开始倒计时
@@ -213,7 +245,7 @@ export default {
         passwordLoginLoading.value = true
         
         // 调用登录接口
-        await store.dispatch('user/login', {
+        await userStore.login({
           username: passwordForm.value.username,
           password: passwordForm.value.password
         })
@@ -236,7 +268,7 @@ export default {
         smsLoginLoading.value = true
         
         // 调用登录接口
-        await store.dispatch('user/login', {
+        await userStore.login({
           phone: smsForm.value.phone,
           checkCode: smsForm.value.checkCode,
           loginType: 'sms'
@@ -271,7 +303,10 @@ export default {
       passwordLoginLoading,
       smsLoginLoading,
       countDown,
+      usernameFieldRef,
+      phoneFieldRef,
       onClickLeft,
+      onTabChange,
       sendVerifyCode,
       onPasswordSubmit,
       onSmsSubmit,

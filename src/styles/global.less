@@ -1,9 +1,47 @@
 @import './variables.less';
 
-// 全局样式重置
-body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, input, button, textarea {
+/* 全局样式 */
+:root {
+  /* 添加全局CSS变量 */
+  --van-primary-color: #ff0000 !important;
+  --van-success-color: #ff0000 !important;
+  --van-danger-color: #ff0000 !important;
+  --van-button-primary-background: #ff0000 !important;
+  --van-button-primary-border-color: #ff0000 !important;
+  --van-button-success-background: #ff0000 !important;
+  --van-button-success-border-color: #ff0000 !important;
+}
+
+/* 全局样式重置 */
+html, body {
   margin: 0;
   padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Segoe UI, Arial, Roboto, "PingFang SC", "miui", "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 修复移动端点击时的高亮效果 */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* 按钮、可点击元素样式重置 */
+a, button, .van-button, .van-tab, .van-tabbar-item {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  outline: none !important;
+}
+
+/* 修复Safari和Chrome的点击高亮问题 */
+input, textarea, button, select, a, div[role="button"] {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
+  outline: none !important;
 }
 
 body {
@@ -299,4 +337,72 @@ img {
 .safe-area-bottom {
   padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 强制覆盖Vant组件绿色为红色 */
+.van-nav-bar {
+  background-color: @primary-color !important;
+}
+
+.van-button--success {
+  background-color: @primary-color !important;
+  border-color: @primary-color !important;
+}
+
+.van-switch--on {
+  background-color: @primary-color !important;
+}
+
+.van-slider__bar {
+  background-color: @primary-color !important;
+}
+
+.van-checkbox__icon--checked {
+  background-color: @primary-color !important;
+  border-color: @primary-color !important;
+}
+
+.van-radio__icon--checked {
+  background-color: @primary-color !important;
+  border-color: @primary-color !important;
+}
+
+.van-tabs__line {
+  background-color: @primary-color !important;
+}
+
+.van-coupon-list__close {
+  color: @primary-color !important;
+}
+
+.van-dialog__confirm {
+  color: @primary-color !important;
+}
+
+.van-search {
+  background-color: @primary-color !important;
+}
+
+/* 修复顶部搜索框背景色 */
+.search-bar, .search-header {
+  background: linear-gradient(135deg, @primary-color, darken(@primary-color, 10%)) !important;
+}
+
+/* 修复绿色图标 */
+.van-icon, .van-icon--link {
+  &.van-icon-success {
+    color: @primary-color !important;
+  }
+}
+
+/* 修复绿色按钮 */
+.van-button--primary, 
+.van-button--success {
+  background-color: @primary-color !important;
+  border-color: @primary-color !important;
+}
+
+/* 修复绿色开关 */
+.van-switch--on {
+  background-color: @primary-color !important;
 } 

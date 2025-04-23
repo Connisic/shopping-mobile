@@ -28,17 +28,18 @@
 <script>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useAddressStore, useUserStore } from '@/stores'
 
 export default {
   name: 'Address',
   setup() {
     const router = useRouter()
-    const store = useStore()
+    const addressStore = useAddressStore()
+    const userStore = useUserStore()
     const chosenAddressId = ref('1')
     
     // 从store获取地址列表
-    const addressList = computed(() => store.state.address.list)
+    const addressList = computed(() => addressStore.list)
     
     // 格式化后的地址列表，确保完全符合Vant要求
     const formattedAddressList = computed(() => {
@@ -84,7 +85,7 @@ export default {
       
       if (fromCheckout) {
         // 如果是从结算页面跳转来的，选择地址后返回
-        store.commit('user/SET_DEFAULT_ADDRESS', item.id)
+        userStore.setDefaultAddress(item.id)
         router.back()
       }
     }

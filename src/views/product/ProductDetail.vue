@@ -166,7 +166,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useCartStore, useProductStore, useSeckillStore } from '@/stores'
 import { Toast } from 'vant'
 import { formatPrice, formatTime } from '@/utils'
 import Empty from '@/components/Empty.vue'
@@ -179,7 +179,9 @@ export default {
   setup() {
     const route = useRoute()
     const router = useRouter()
-    const store = useStore()
+    const cartStore = useCartStore()
+    const productStore = useProductStore()
+    const seckillStore = useSeckillStore()
     
     // 商品ID
     const productId = computed(() => Number(route.params.id))
@@ -188,15 +190,15 @@ export default {
     const isSeckill = computed(() => route.query.isSeckill === 'true')
     
     // 从store获取秒杀数据
-    const countdown = computed(() => store.getters['seckill/countdown'])
+    const countdown = computed(() => seckillStore.countdown)
     
     let timer = null;
     
     // 商品数据
-    const product = computed(() => store.state.product.currentProduct)
+    const product = computed(() => productStore.currentProduct)
     
     // 购物车商品数量
-    const cartCount = computed(() => store.getters['cart/totalCount'])
+    const cartCount = computed(() => cartStore.totalCount)
     
     // Tab激活状态
     const activeTab = ref(0)
@@ -292,15 +294,15 @@ export default {
       }
       
       // 添加到购物车
-      store.dispatch('cart/addToCart', productData)
+      cartStore.addToCart(productData)
       
       if (buyMode.value) {
         // 立即购买模式
         // 清除其他商品的选中状态
-        const cartItems = store.state.cart.cartItems
+        const cartItems = cartStore.cartItems
         cartItems.forEach(item => {
           if (item.id !== productData.id) {
-            store.dispatch('cart/toggleChecked', { id: item.id, checked: false })
+            cartStore.toggleChecked({ id: item.id, checked: false })
           }
         })
         
@@ -320,10 +322,10 @@ export default {
     const startCountdown = () => {
       if (isSeckill.value) {
         // 立即执行一次
-        store.dispatch('seckill/updateCountdown')
+        seckillStore.updateCountdown()
         // 设置定时器，每秒更新一次
         timer = setInterval(() => {
-          store.dispatch('seckill/updateCountdown')
+          seckillStore.updateCountdown()
         }, 1000)
       }
     }
@@ -331,7 +333,7 @@ export default {
     // 获取商品详情
     const fetchProductDetail = async () => {
       try {
-        await store.dispatch('product/fetchProductDetail', productId.value)
+        await productStore.fetchProductDetail(productId.value)
         
         // 初始化选中规格数组
         if (product.value && product.value.specs.length > 0) {

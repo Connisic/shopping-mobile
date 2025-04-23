@@ -13,7 +13,7 @@
         @clear="onClear"
       >
         <template #action>
-          <van-icon name="search" size="18" />
+          <van-icon name="search" size="18" class="search-icon" />
         </template>
       </van-search>
     </div>
@@ -92,7 +92,7 @@
     </div>
     
     <div v-if="loading" class="loading-container">
-      <van-loading class="loading-spinner" type="spinner" color="#1989fa" size="24px" />
+      <van-loading class="loading-spinner" type="spinner" color="#e53e3e" size="24px" />
       <p class="loading-text">正在搜索中，请稍候...</p>
     </div>
   </div>
@@ -102,14 +102,14 @@
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Toast } from 'vant'
-import { useStore } from 'vuex'
+import { useSearchStore } from '@/stores'
 
 export default {
   name: 'SearchResults',
   setup() {
     const route = useRoute()
     const router = useRouter()
-    const store = useStore()
+    const searchStore = useSearchStore()
     
     // 搜索关键词
     const keyword = ref('')
@@ -191,30 +191,47 @@ export default {
     }
     
     // 加载商品列表
-    const loadProducts = async () => {
+    const loadProducts = async (params = {}) => {
       if (loading.value) return
       
       loading.value = true
       
       try {
-        // 调用store中的searchProducts action
-        await store.dispatch('search/searchProducts', {
-          keyword: keyword.value,
-          page: page.value,
-          ...filter.value.minPrice ? { minPrice: Number(filter.value.minPrice) } : {},
-          ...filter.value.maxPrice ? { maxPrice: Number(filter.value.maxPrice) } : {}
-        })
+        // 调用store中的search action
+        const result = await searchStore.search(
+          keyword.value,
+          params.page || page.value,
+          10
+        )
+        
+        // 更新商品列表
+        if ((params.page || page.value) === 1) {
+          products.value = result.items || []
+        } else {
+          products.value = [...products.value, ...(result.items || [])]
+        }
+        
+        // 更新页码
+        page.value = params.page || page.value
+        
+        // 检查是否已加载全部数据
+        finished.value = searchStore.finished
         
         // 根据激活的标签设置排序参数
         const sortParams = getSortParams()
-        if (sortParams.sort) {
-          await store.dispatch('search/searchProducts', {
-            ...sortParams
+        if (sortParams.sort && page.value === 1) {
+          // 如果需要排序且是第一页，应用排序
+          products.value.sort((a, b) => {
+            if (sortParams.order === 'desc') {
+              return b[sortParams.sort] - a[sortParams.sort]
+            } else {
+              return a[sortParams.sort] - b[sortParams.sort]
+            }
           })
         }
         
         // 更新搜索历史
-        store.dispatch('search/addSearchHistory', keyword.value)
+        searchStore.addSearchHistory(keyword.value)
       } catch (error) {
         console.error('搜索商品失败', error)
         Toast('搜索失败，请重试')
@@ -262,7 +279,7 @@ export default {
       if (route.query.keyword) {
         keyword.value = route.query.keyword.toString()
         // 将URL参数中的关键词存入store
-        store.dispatch('search/resetSearchParams', keyword.value)
+        searchStore.resetSearchParams(keyword.value)
         // 获取搜索结果
         loadProducts()
         hasSearched.value = true
@@ -273,7 +290,7 @@ export default {
     const onLoadMore = async () => {
       if (loading.value || finished.value) return
       
-      const nextPage = store.getters['search/searchResults'].page + 1
+      const nextPage = searchStore.pagination.currentPage + 1
       await loadProducts({
         page: nextPage
       })
@@ -301,9 +318,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '@/styles/variables.less';
+
 .search-results {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #f8f8f8;
   padding-bottom: 50px;
   position: absolute;
   top: 0;
@@ -313,15 +332,17 @@ export default {
   .search-header {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
-    background-color: #fff;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, @primary-color, darken(@primary-color, 10%));
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     
     .back-icon {
       font-size: 20px;
       margin-right: 8px;
+      color: #fff;
     }
     
     :deep(.van-search) {
@@ -329,82 +350,117 @@ export default {
       padding: 0;
       
       .van-search__content {
-        background-color: #f5f5f5;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       }
+    }
+    
+    .search-icon {
+      color: #fff;
     }
   }
   
   .category-tabs {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 12px;
+    
     :deep(.van-tabs__wrap) {
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      box-shadow: none;
     }
     
     :deep(.van-tab) {
       flex: 1;
       min-width: auto;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    :deep(.van-tab--active) {
+      color: @primary-color;
+      font-weight: 500;
+    }
+    
+    :deep(.van-tabs__line) {
+      background-color: @primary-color;
+      width: 20px !important;
+      border-radius: 2px;
     }
   }
   
   .product-list {
-    padding: 8px;
+    padding: 0 12px;
     
     .product-item {
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
     
     .product-card {
       background-color: #fff;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
-      margin-bottom: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s;
+      
+      &:active {
+        transform: scale(0.98);
+      }
       
       .product-image {
         position: relative;
         
         .van-image {
           width: 100%;
-          height: 160px;
+          height: 180px;
         }
         
         .product-tag {
           position: absolute;
           top: 0;
           left: 0;
-          background-color: #ff5000;
+          background-color: @primary-color;
           color: #fff;
           font-size: 12px;
-          padding: 2px 6px;
+          padding: 4px 8px;
           border-bottom-right-radius: 8px;
         }
       }
       
       .product-content {
-        padding: 8px 12px;
+        padding: 12px 16px;
         
         .product-source {
-          margin-bottom: 4px;
+          margin-bottom: 8px;
+          
+          :deep(.van-tag--danger) {
+            color: @primary-color;
+            border-color: @primary-color;
+          }
         }
         
         .product-title {
-          font-size: 14px;
+          font-size: 15px;
           line-height: 1.4;
-          margin-bottom: 8px;
+          margin-bottom: 12px;
           display: -webkit-box;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
           overflow: hidden;
+          color: #333;
+          font-weight: 500;
         }
         
         .product-price-info {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 4px;
+          margin-bottom: 8px;
           
           .price {
-            font-size: 16px;
-            color: #ff5000;
-            font-weight: 500;
+            font-size: 18px;
+            color: @primary-color;
+            font-weight: 600;
           }
           
           .sales {
@@ -421,10 +477,18 @@ export default {
           .ship-tag {
             display: inline-block;
             font-size: 12px;
-            color: #999;
-            padding: 1px 4px;
-            border: 1px solid #eee;
-            border-radius: 2px;
+            padding: 2px 8px;
+            border-radius: 4px;
+          }
+          
+          .new-tag {
+            background-color: rgba(229, 62, 62, 0.1);
+            color: @primary-color;
+          }
+          
+          .ship-tag {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
           }
         }
       }
@@ -435,25 +499,35 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px;
-  }
-  
-  .loading-spinner {
-    margin-bottom: 16px;
-  }
-  
-  .loading-text {
-    font-size: 14px;
-    color: #999;
+    padding: 24px;
+    
+    .loading-spinner {
+      margin-bottom: 16px;
+    }
+    
+    .loading-text {
+      font-size: 14px;
+      color: #999;
+    }
   }
   
   .empty-state-container {
-    padding: 40px 16px;
+    padding: 60px 16px;
     text-align: center;
     
     .search-icon {
-      color: #ccc;
+      color: rgba(229, 62, 62, 0.2);
       margin-bottom: 16px;
+    }
+    
+    :deep(.van-empty__image) {
+      width: 120px;
+      height: 120px;
+    }
+    
+    :deep(.van-empty__description) {
+      color: #999;
+      margin-top: 12px;
     }
   }
   
@@ -473,11 +547,12 @@ export default {
       justify-content: space-between;
       align-items: center;
       padding: 16px;
-      box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.05);
+      border-bottom: 1px solid #f5f5f5;
       
       .filter-popup-title {
         font-size: 16px;
-        font-weight: 500;
+        font-weight: 600;
+        color: #333;
       }
     }
     
@@ -487,12 +562,27 @@ export default {
       padding: 16px;
       
       .filter-section {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         
         .filter-section-title {
-          font-size: 14px;
-          font-weight: 500;
-          margin-bottom: 12px;
+          font-size: 15px;
+          font-weight: 600;
+          margin-bottom: 16px;
+          color: #333;
+          position: relative;
+          padding-left: 12px;
+          
+          &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 16px;
+            background-color: @primary-color;
+            border-radius: 2px;
+          }
         }
         
         .price-range {
@@ -500,8 +590,17 @@ export default {
           align-items: center;
           
           .separator {
-            margin: 0 8px;
+            margin: 0 12px;
             color: #999;
+          }
+          
+          :deep(.van-field) {
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            
+            .van-field__control {
+              text-align: center;
+            }
           }
         }
       }
@@ -512,7 +611,12 @@ export default {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-      box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.05);
+      border-top: 1px solid #f5f5f5;
+      
+      :deep(.van-button--danger) {
+        background-color: @primary-color;
+        border-color: @primary-color;
+      }
     }
   }
 }

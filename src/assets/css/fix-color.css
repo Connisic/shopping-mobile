@@ -1,0 +1,138 @@
+/* 强制覆盖所有绿色为红色主题色 */
+
+:root {
+  --van-primary-color: var(--primary-color) !important;
+  --van-success-color: var(--primary-color) !important;
+  --van-danger-color: var(--primary-color) !important;
+  --van-button-primary-background: var(--primary-color) !important;
+  --van-button-primary-border-color: var(--primary-color) !important;
+  --van-button-success-background: var(--primary-color) !important;
+  --van-button-success-border-color: var(--primary-color) !important;
+  --van-green: var(--primary-color) !important; /* 覆盖绿色变量 */
+}
+
+/* Vant组件覆盖 */
+.van-nav-bar,
+.van-search,
+.search-bar {
+  background-color: var(--primary-color) !important;
+}
+
+/* 按钮相关 */
+.van-button--success,
+.van-button--primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* 开关相关 */
+.van-switch--on {
+  background-color: var(--primary-color) !important;
+}
+
+/* 滑块相关 */
+.van-slider__bar {
+  background-color: var(--primary-color) !important;
+}
+
+/* 复选框相关 */
+.van-checkbox__icon--checked {
+  color: #fff !important;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* 单选框相关 */
+.van-radio__icon--checked {
+  color: #fff !important;
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* 标签页相关 */
+.van-tabs__line {
+  background-color: var(--primary-color) !important;
+}
+
+.van-tab--active {
+  color: var(--primary-color) !important;
+}
+
+/* 步骤条相关 */
+.van-step--finish {
+  color: var(--primary-color) !important;
+}
+
+.van-step--finish .van-step__circle,
+.van-step--finish .van-step__line {
+  background-color: var(--primary-color) !important;
+}
+
+/* 绿色图标覆盖 */
+.van-icon-success,
+.van-icon-checked {
+  color: var(--primary-color) !important;
+}
+
+/* 通知栏相关 */
+.van-notice-bar {
+  background-color: #fef0f0 !important;
+  color: var(--primary-color) !important;
+}
+
+/* 标签相关 */
+.van-tag--success {
+  background-color: var(--primary-color) !important;
+}
+
+/* 顶部搜索框背景 */
+.search-bar,
+.search-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color)) !important;
+}
+
+/* 进度条相关 */
+.van-progress__pivot {
+  background-color: var(--primary-color) !important;
+}
+
+/* 全局绿色文本覆盖 */
+.van-text-success,
+.van-text-green {
+  color: var(--primary-color) !important;
+}
+
+/* 覆盖内联样式 */
+[style*="color: #07c160"],
+[style*="color:#07c160"],
+[style*="color: rgb(7, 193, 96)"],
+[style*="color:rgb(7, 193, 96)"],
+[style*="color: #52c41a"],
+[style*="color:#52c41a"] {
+  color: var(--primary-color) !important;
+}
+
+[style*="background-color: #07c160"],
+[style*="background-color:#07c160"],
+[style*="background-color: rgb(7, 193, 96)"],
+[style*="background-color:rgb(7, 193, 96)"],
+[style*="background-color: #52c41a"],
+[style*="background-color:#52c41a"] {
+  background-color: var(--primary-color) !important;
+}
+
+[style*="border-color: #07c160"],
+[style*="border-color:#07c160"],
+[style*="border-color: rgb(7, 193, 96)"],
+[style*="border-color:rgb(7, 193, 96)"],
+[style*="border-color: #52c41a"],
+[style*="border-color:#52c41a"] {
+  border-color: var(--primary-color) !important;
+}
+
+/* 任何绿色图标覆盖 */
+.bg-green, 
+.bg-success {
+  background-color: var(--background-light, #fff0f0) !important;
+  color: var(--primary-color) !important;
+} 

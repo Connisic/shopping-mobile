@@ -177,14 +177,14 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { Toast } from 'vant'
-import { useStore } from 'vuex'
+import { useUserStore } from '@/stores'
 import userAPI from '@/services/user'
 
 export default {
   name: 'RegisterPage',
   setup() {
     const router = useRouter()
-    const store = useStore()
+    const userStore = useUserStore()
     
     // 注册表单
     const form = ref({
@@ -235,7 +235,7 @@ export default {
       
       // 发送验证码
       try {
-        await store.dispatch('user/getVerifyCode', form.value.phone)
+        await userStore.getVerifyCode(form.value.phone)
         Toast.success('验证码已发送')
         
         // 开始倒计时
@@ -283,7 +283,7 @@ export default {
         }
         
         // 调用注册接口
-        await store.dispatch('user/register', registerData)
+        await userStore.register(registerData)
         
         Toast.success('注册成功，请登录')
         

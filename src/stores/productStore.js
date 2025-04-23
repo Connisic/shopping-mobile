@@ -1,124 +1,5 @@
+import { defineStore } from 'pinia'
 import { productAPI } from '@/services'
-
-export default {
-  namespaced: true,
-  state: {
-    categories: [],
-    products: [],
-    currentProduct: null,
-    recommendProducts: []
-  },
-  mutations: {
-    SET_CATEGORIES(state, categories) {
-      state.categories = categories
-    },
-    SET_PRODUCTS(state, products) {
-      state.products = products
-    },
-    SET_CURRENT_PRODUCT(state, product) {
-      state.currentProduct = product
-    },
-    SET_RECOMMEND_PRODUCTS(state, products) {
-      state.recommendProducts = products
-    }
-  },
-  actions: {
-    async fetchCategories({ commit }) {
-      try {
-        const response = await productAPI.getCategories()
-        commit('SET_CATEGORIES', response.data)
-        return response.data
-      } catch (error) {
-        console.error('获取分类失败：', error)
-        return []
-      }
-    },
-    async search({ commit }, params) {
-      try {
-        const response = await productAPI.getProductList(params)
-        const goodsPage = response.data.goodsPage
-        
-        // 转换数据结构以适配前端组件
-        const products = goodsPage.records.map(item => ({
-          id: item.id,
-          title: item.goodsName,
-          price: item.price,
-          image: item.headerPic,
-          sales: item.sales,
-          description: item.introduction
-        }))
-        
-        commit('SET_PRODUCTS', products)
-        
-        return {
-          items: products,
-          total: goodsPage.total,
-          page: goodsPage.current,
-          pageSize: goodsPage.size
-        }
-      } catch (error) {
-        console.error('搜索商品失败：', error)
-        return {
-          items: [],
-          total: 0,
-          page: 1,
-          pageSize: 10
-        }
-      }
-    },
-    async fetchProductDetail({ commit }, id) {
-      try {
-        const response = await productAPI.getProductDetail(id)
-        const productData = response.data
-        
-        // 转换数据结构以适配前端组件
-        const product = {
-          id: productData.id,
-          title: productData.goodsName,
-          price: productData.price,
-          originPrice: productData.price * 1.2, // 假设原价高20%
-          sales: productData.sales || 0,
-          stock: 100, // 假设库存为100
-          images: productData.images ? productData.images.map(img => img.imageUrl) : [productData.headerPic],
-          description: productData.introduction,
-          // 处理规格
-          specs: productData.specifications ? productData.specifications.map(spec => ({
-            name: spec.specName,
-            values: spec.specificationOptions.map(opt => opt.optionName)
-          })) : [],
-          // 生成SKUs
-          skus: generateSkus(productData)
-        }
-        
-        commit('SET_CURRENT_PRODUCT', product)
-        return product
-      } catch (error) {
-        console.error('获取商品详情失败：', error)
-        return null
-      }
-    },
-    async fetchRecommendProducts({ commit }) {
-      try {
-        const response = await productAPI.getRecommendProducts()
-        
-        // 转换数据结构以适配前端组件
-        const products = response.data.records.map(item => ({
-          id: item.id,
-          title: item.goodsName,
-          price: item.price,
-          image: item.headerPic,
-          sales: item.sales
-        }))
-        
-        commit('SET_RECOMMEND_PRODUCTS', products)
-        return products
-      } catch (error) {
-        console.error('获取推荐商品失败：', error)
-        return []
-      }
-    }
-  }
-}
 
 // 根据商品规格生成SKUs
 function generateSkus(product) {
@@ -163,4 +44,137 @@ function generateCombinations(arrays) {
   }
   
   return result
-} 
+}
+
+export const useProductStore = defineStore('product', {
+  state: () => ({
+    categories: [],
+    products: [],
+    currentProduct: null,
+    recommendProducts: []
+  }),
+  
+  actions: {
+    // 设置分类列表
+    setCategories(categories) {
+      this.categories = categories
+    },
+    
+    // 设置商品列表
+    setProducts(products) {
+      this.products = products
+    },
+    
+    // 设置当前商品
+    setCurrentProduct(product) {
+      this.currentProduct = product
+    },
+    
+    // 设置推荐商品
+    setRecommendProducts(products) {
+      this.recommendProducts = products
+    },
+    
+    // 获取分类列表
+    async fetchCategories() {
+      try {
+        const response = await productAPI.getCategories()
+        this.setCategories(response.data)
+        return response.data
+      } catch (error) {
+        console.error('获取分类失败：', error)
+        return []
+      }
+    },
+    
+    // 搜索商品
+    async search(params) {
+      try {
+        const response = await productAPI.getProductList(params)
+        const goodsPage = response.data.goodsPage
+        
+        // 转换数据结构以适配前端组件
+        const products = goodsPage.records.map(item => ({
+          id: item.id,
+          title: item.goodsName,
+          price: item.price,
+          image: item.headerPic,
+          sales: item.sales,
+          description: item.introduction
+        }))
+        
+        this.setProducts(products)
+        
+        return {
+          items: products,
+          total: goodsPage.total,
+          page: goodsPage.current,
+          pageSize: goodsPage.size
+        }
+      } catch (error) {
+        console.error('搜索商品失败：', error)
+        return {
+          items: [],
+          total: 0,
+          page: 1,
+          pageSize: 10
+        }
+      }
+    },
+    
+    // 获取商品详情
+    async fetchProductDetail(id) {
+      try {
+        const response = await productAPI.getProductDetail(id)
+        const productData = response.data
+        
+        // 转换数据结构以适配前端组件
+        const product = {
+          id: productData.id,
+          title: productData.goodsName,
+          price: productData.price,
+          originPrice: productData.price * 1.2, // 假设原价高20%
+          sales: productData.sales || 0,
+          stock: 100, // 假设库存为100
+          images: productData.images ? productData.images.map(img => img.imageUrl) : [productData.headerPic],
+          description: productData.introduction,
+          // 处理规格
+          specs: productData.specifications ? productData.specifications.map(spec => ({
+            name: spec.specName,
+            values: spec.specificationOptions.map(opt => opt.optionName)
+          })) : [],
+          // 生成SKUs
+          skus: generateSkus(productData)
+        }
+        
+        this.setCurrentProduct(product)
+        return product
+      } catch (error) {
+        console.error('获取商品详情失败：', error)
+        return null
+      }
+    },
+    
+    // 获取推荐商品
+    async fetchRecommendProducts() {
+      try {
+        const response = await productAPI.getRecommendProducts()
+        
+        // 转换数据结构以适配前端组件
+        const products = response.data.records.map(item => ({
+          id: item.id,
+          title: item.goodsName,
+          price: item.price,
+          image: item.headerPic,
+          sales: item.sales
+        }))
+        
+        this.setRecommendProducts(products)
+        return products
+      } catch (error) {
+        console.error('获取推荐商品失败：', error)
+        return []
+      }
+    }
+  }
+}) 

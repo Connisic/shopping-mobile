@@ -16,7 +16,7 @@
           @input="onKeywordInput"
         >
           <template #right-icon>
-            <van-icon name="photograph" @click="onTakePhoto" />
+            <van-icon name="photograph" class="photo-icon" @click="onTakePhoto" />
           </template>
         </van-search>
       </div>
@@ -31,7 +31,7 @@
         class="suggestion-item"
         @click="onTagClick(item)"
       >
-        <van-icon name="search" />
+        <van-icon name="search" class="suggestion-icon" />
         <span v-html="highlightKeyword(item, keyword)"></span>
       </div>
     </div>
@@ -39,8 +39,8 @@
     <!-- 历史搜索 -->
     <div class="search-section" v-if="searchHistory.length">
       <div class="section-header">
-        <span>历史搜索</span>
-        <van-icon name="delete" @click="clearHistory" />
+        <span class="section-title">历史搜索</span>
+        <van-icon name="delete" class="delete-icon" @click="clearHistory" />
       </div>
       <div class="search-tags">
         <div v-for="(item, index) in searchHistory" 
@@ -56,9 +56,9 @@
     <!-- 猜你想搜 -->
     <div class="search-section">
       <div class="section-header">
-        <span>猜你想搜</span>
+        <span class="section-title">猜你想搜</span>
         <div class="refresh" @click="refreshSuggestions">
-          <van-icon name="replay" />
+          <van-icon name="replay" class="refresh-icon" />
           <span>换一批</span>
         </div>
       </div>
@@ -78,7 +78,7 @@
       <div class="section-header">
         <div class="hot-title">
           <van-icon name="fire" class="hot-icon" />
-          <span>YY热搜</span>
+          <span class="section-title">YY热搜</span>
         </div>
         <div class="rank-tabs">
           <span class="active">榜单</span>
@@ -110,14 +110,14 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useSearchStore } from '@/stores'
 import { Toast } from 'vant'
 
 export default {
   name: 'Search',
   setup() {
     const router = useRouter()
-    const store = useStore()
+    const searchStore = useSearchStore()
     const keyword = ref('')
     
     // 从store获取历史搜索
@@ -132,8 +132,7 @@ export default {
     // 初始化数据
     onMounted(async () => {
       // 获取历史搜索
-      await store.dispatch('search/getSearchHistory')
-      searchHistory.value = store.getters['search/searchHistory']
+      searchHistory.value = searchStore.history
       
       // 获取热搜关键词
       await loadHotKeywords()
@@ -142,16 +141,13 @@ export default {
     // 加载热搜关键词
     const loadHotKeywords = async () => {
       try {
-        await store.dispatch('search/getHotKeywords', 10)
-        const hotKeywords = store.getters['search/hotKeywords']
-        
-        // 格式化热搜数据
-        hotSearchList.value = hotKeywords.map((item, index) => ({
-          id: item.id || index,
-          keyword: item.keyword,
-          tag: item.tag || '',
-          count: (item.count / 10000).toFixed(1) || '0',
-          trending: item.trending || (Math.random() > 0.3 ? 'up' : 'down')
+        // 使用直接的Pinia属性访问
+        hotSearchList.value = searchStore.hotKeywords.map((keyword, index) => ({
+          id: index,
+          keyword: keyword,
+          tag: '',
+          count: (Math.random() * 100).toFixed(1),
+          trending: Math.random() > 0.3 ? 'up' : 'down'
         }))
       } catch (error) {
         console.error('获取热搜关键词失败', error)
@@ -167,11 +163,10 @@ export default {
     const onKeywordInput = async () => {
       if (keyword.value.trim()) {
         try {
-          await store.dispatch('search/getSearchSuggestions', {
-            keyword: keyword.value.trim(),
-            limit: 8
-          })
-          suggestions.value = store.getters['search/suggestions']
+          // 简单过滤热门搜索词作为建议
+          suggestions.value = searchStore.hotKeywords
+            .filter(item => item.toLowerCase().includes(keyword.value.toLowerCase()))
+            .slice(0, 8)
           showSuggestions.value = true
         } catch (error) {
           console.error('获取搜索建议失败', error)
@@ -190,10 +185,7 @@ export default {
       }
       
       // 添加到搜索历史
-      store.dispatch('search/addSearchHistory', keyword.value.trim())
-      
-      // 重置搜索参数，仅保留关键词
-      store.dispatch('search/resetSearchParams', keyword.value.trim())
+      searchStore.addSearchHistory(keyword.value.trim())
       
       // 跳转到搜索结果页
       router.push({
@@ -217,7 +209,7 @@ export default {
     // 清空历史记录
     const clearHistory = async () => {
       try {
-        await store.dispatch('search/clearSearchHistory')
+        await searchStore.clearSearchHistory()
         searchHistory.value = []
         Toast('历史记录已清空')
       } catch (error) {
@@ -234,12 +226,8 @@ export default {
     // 刷新推荐搜索词
     const refreshSuggestions = async () => {
       try {
-        await store.dispatch('search/getHotKeywords', 8)
-        const hotKeywords = store.getters['search/hotKeywords']
-        
         // 随机打乱热词作为推荐
-        suggestions.value = hotKeywords
-          .map(item => item.keyword)
+        suggestions.value = [...searchStore.hotKeywords]
           .sort(() => Math.random() - 0.5)
           .slice(0, 8)
         
@@ -282,7 +270,7 @@ export default {
 
 .search {
   min-height: 100vh;
-  background-color: #fff;
+  background-color: #f8f8f8;
   position: absolute;
   top: 0;
   left: 0;
@@ -292,13 +280,20 @@ export default {
   .search-header {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
-    background-color: @primary-color;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, @primary-color, darken(@primary-color, 10%));
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 
     .back {
-      padding: 4px;
+      padding: 6px;
       margin-right: 8px;
       color: #fff;
+      border-radius: 50%;
+      transition: background-color 0.3s;
+      
+      &:active {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
     }
 
     .search-input {
@@ -308,38 +303,66 @@ export default {
         padding: 0;
 
         .van-search__content {
-          background-color: #fff;
+          background-color: rgba(255, 255, 255, 0.9);
+          border-radius: 20px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .van-field__right-icon {
-          color: #999;
+          color: #666;
+        }
+        
+        .photo-icon {
+          color: @primary-color;
         }
       }
     }
 
     .search-btn {
       padding: 0 12px;
+      margin-left: 12px;
       color: #fff;
-      font-size: 14px;
+      font-size: 15px;
+      font-weight: 500;
+      position: relative;
+      
+      &:active {
+        opacity: 0.8;
+      }
+      
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1px;
+        height: 16px;
+        background-color: rgba(255, 255, 255, 0.3);
+      }
     }
   }
 
   .search-suggestions {
     padding: 16px;
-    border-bottom: 8px solid #f7f8fa;
+    background-color: #fff;
+    border-radius: 0 0 12px 12px;
+    margin: 0 12px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 
     .suggestion-item {
       display: flex;
       align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #f5f5f5;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
       &:last-child {
         border-bottom: none;
       }
 
-      .van-icon {
-        margin-right: 8px;
+      .suggestion-icon {
+        margin-right: 12px;
+        color: #999;
       }
 
       span {
@@ -351,28 +374,54 @@ export default {
           font-weight: bold;
         }
       }
+      
+      &:active {
+        background-color: rgba(0, 0, 0, 0.02);
+      }
     }
   }
 
   .search-section {
-    padding: 16px;
-    border-bottom: 8px solid #f7f8fa;
+    padding: 20px 16px;
+    margin: 0 12px 12px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      font-size: 14px;
-      color: #333;
+      margin-bottom: 16px;
+      
+      .section-title {
+        font-size: 16px;
+        color: #333;
+        font-weight: 600;
+        position: relative;
+        padding-left: 12px;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 4px;
+          height: 16px;
+          background-color: @primary-color;
+          border-radius: 2px;
+        }
+      }
 
       .hot-title {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 8px;
 
         .hot-icon {
           color: @primary-color;
+          font-size: 18px;
         }
       }
 
@@ -381,18 +430,34 @@ export default {
         align-items: center;
         gap: 4px;
         color: #999;
-        font-size: 12px;
+        font-size: 13px;
+        padding: 6px 12px;
+        background-color: #f8f8f8;
+        border-radius: 16px;
+        
+        .refresh-icon {
+          color: @primary-color;
+        }
+      }
+      
+      .delete-icon {
+        color: #999;
+        font-size: 18px;
+        padding: 6px;
       }
 
       .rank-tabs {
         span {
           margin-left: 16px;
           color: #999;
-          font-size: 12px;
+          font-size: 13px;
+          padding: 4px 12px;
+          border-radius: 16px;
 
           &.active {
-            color: #333;
-            font-weight: bold;
+            color: #fff;
+            background-color: @primary-color;
+            font-weight: 500;
           }
         }
       }
@@ -401,28 +466,42 @@ export default {
     .search-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 12px;
 
       .tag-item {
-        padding: 6px 12px;
-        background-color: #f7f8fa;
-        border-radius: 4px;
-        font-size: 12px;
+        padding: 8px 16px;
+        background-color: #f8f8f8;
+        border-radius: 20px;
+        font-size: 13px;
         color: #666;
+        transition: all 0.3s;
+        
+        &:active {
+          background-color: rgba(229, 62, 62, 0.1);
+          color: @primary-color;
+        }
       }
     }
 
     .search-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      gap: 12px;
 
       .grid-item {
-        padding: 8px 12px;
-        background-color: #f7f8fa;
-        border-radius: 4px;
-        font-size: 12px;
+        padding: 12px;
+        background-color: #f8f8f8;
+        border-radius: 8px;
+        font-size: 13px;
         color: #666;
+        transition: all 0.3s;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        
+        &:active {
+          background-color: rgba(229, 62, 62, 0.1);
+          color: @primary-color;
+        }
       }
     }
 
@@ -430,21 +509,27 @@ export default {
       .hot-item {
         display: flex;
         align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #f5f5f5;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
         &:last-child {
           border-bottom: none;
         }
 
         .rank-num {
-          width: 20px;
+          width: 22px;
+          height: 22px;
+          line-height: 22px;
+          text-align: center;
           font-size: 14px;
           color: #999;
           font-weight: bold;
+          border-radius: 4px;
+          background-color: #f8f8f8;
 
           &.top {
-            color: @primary-color;
+            color: #fff;
+            background-color: @primary-color;
           }
         }
 
@@ -453,16 +538,17 @@ export default {
           margin: 0 12px;
 
           .keyword {
-            font-size: 14px;
+            font-size: 15px;
             color: #333;
             margin-bottom: 4px;
+            font-weight: 500;
           }
 
           .tag {
             display: inline-block;
             padding: 2px 6px;
-            background-color: #fff1f1;
-            border-radius: 2px;
+            background-color: rgba(229, 62, 62, 0.1);
+            border-radius: 4px;
             font-size: 10px;
             color: @primary-color;
           }

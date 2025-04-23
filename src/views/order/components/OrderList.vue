@@ -1,7 +1,7 @@
 <template>
   <div class="order-list">
     <div v-if="loading" class="loading">
-      <van-loading color="#e53e3e" />
+      <van-loading color="var(--primary-color)" />
     </div>
     
     <van-empty v-else-if="!orders.length" description="暂无订单" />
@@ -89,7 +89,7 @@
 
 <script>
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useOrderStore } from '@/stores'
 import { Dialog } from 'vant'
 
 export default {
@@ -106,7 +106,7 @@ export default {
   },
   setup() {
     const router = useRouter()
-    const store = useStore()
+    const orderStore = useOrderStore()
     
     // 获取订单状态文本
     const getStatusText = (status) => {
@@ -157,7 +157,7 @@ export default {
         title: '确认收货',
         message: '确认已收到商品吗？',
       }).then(() => {
-        store.dispatch('order/updateOrderStatus', { id: order.id, status: 'completed' })
+        orderStore.updateOrderStatus({ id: order.id, status: 'completed' })
       }).catch(() => {
         // 取消操作
       })
@@ -174,7 +174,7 @@ export default {
         title: '取消订单',
         message: '确认取消该订单吗？',
       }).then(() => {
-        store.dispatch('order/updateOrderStatus', { id: order.id, status: 'cancelled' })
+        orderStore.updateOrderStatus({ id: order.id, status: 'cancelled' })
       }).catch(() => {
         // 取消操作
       })
@@ -237,23 +237,23 @@ export default {
           font-size: 14px;
           
           &.pending {
-            color: #ff976a;
+            color: var(--status-pending);
           }
           
           &.paid {
-            color: #1989fa;
+            color: var(--status-paid);
           }
           
           &.delivered {
-            color: #07c160;
+            color: var(--status-delivered);
           }
           
           &.completed {
-            color: #969799;
+            color: var(--status-completed);
           }
           
           &.cancelled {
-            color: #969799;
+            color: var(--status-cancelled);
           }
         }
       }

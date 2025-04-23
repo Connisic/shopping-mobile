@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import store from '@/store'
+import { useUserStore } from '@/stores/userStore'
 
 const routes = [
   {
@@ -117,10 +117,17 @@ const router = createRouter({
 
 // 全局路由守卫
 router.beforeEach((to, from, next) => {
+  // 暂时禁用登录校验，全部放行
+  next()
+  
+  /* 原来的登录校验逻辑，暂时注释掉
   // 检查该路由是否需要登录
   if (to.matched.some(record => record.meta.requiresAuth)) {
+    // 使用Pinia获取用户状态
+    const userStore = useUserStore()
+    
     // 检查用户是否已登录
-    if (!store.getters['user/isLogin']) {
+    if (!userStore.isLogin) {
       // 未登录，重定向到登录页
       next({
         path: '/login',
@@ -134,6 +141,7 @@ router.beforeEach((to, from, next) => {
     // 不需要登录，继续导航
     next()
   }
+  */
 })
 
 export default router 

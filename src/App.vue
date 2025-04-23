@@ -1,25 +1,17 @@
 <template>
-  <div id="app" class="app" :class="{ 'dark': isDarkMode }">
-    <router-view v-slot="{ Component, route }">
-      <transition :name="transitionName">
-        <keep-alive>
-          <component :is="Component" :key="route.fullPath" class="page-component" />
-        </keep-alive>
-      </transition>
+  <div id="app" class="app-container">
+    <router-view v-slot="{ Component }">
+      <keep-alive :include="['Home', 'Category', 'Cart', 'Profile']">
+        <component :is="Component" />
+      </keep-alive>
     </router-view>
-    <van-tabbar v-model="active" active-color="#e53e3e" v-if="showTabbar">
-      <van-tabbar-item icon="home-o" to="/">首页</van-tabbar-item>
-      <van-tabbar-item icon="chat-o" to="/messages">消息</van-tabbar-item>
-      <van-tabbar-item icon="cart-o" to="/cart" :badge="cartCount ? cartCount : ''">购物车</van-tabbar-item>
-      <van-tabbar-item icon="user-o" to="/profile">我的</van-tabbar-item>
-    </van-tabbar>
   </div>
 </template>
 
 <script>
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useCartStore } from '@/stores/cartStore'
 import { bus, isDarkMode as globalDarkMode } from '@/utils/eventBus'
 
 export default {
@@ -27,7 +19,7 @@ export default {
   setup() {
     const route = useRoute()
     const router = useRouter()
-    const store = useStore()
+    const cartStore = useCartStore()
     
     // 深色模式，使用全局状态
     const isDarkMode = globalDarkMode
@@ -39,6 +31,10 @@ export default {
     
     onMounted(() => {
       bus.on('theme-change', onThemeChange)
+      
+      // 设置Vant主题色
+      document.documentElement.style.setProperty('--van-primary-color', '#e53e3e');
+      document.documentElement.style.setProperty('--van-success-color', '#e53e3e');
     })
     
     onBeforeUnmount(() => {
@@ -54,8 +50,8 @@ export default {
     // 记录导航历史，用于判断过渡方向
     const navHistory = ref([])
     
-    // 购物车商品数量
-    const cartCount = computed(() => store.getters['cart/totalCount'])
+    // 购物车商品数量 - 使用Pinia
+    const cartCount = computed(() => cartStore.totalCount)
     
     // 监听路由变化，记录导航历史并设置过渡方向
     watch(() => route.fullPath, (to, from) => {
@@ -141,6 +137,8 @@ export default {
 </script>
 
 <style lang="less">
+@import '@/styles/variables.less';
+
 #app {
   background-color: var(--background-color);
   color: var(--text-color);
@@ -163,6 +161,32 @@ export default {
     padding-bottom: constant(safe-area-inset-bottom);
     padding-bottom: env(safe-area-inset-bottom);
   }
+}
+
+/* 防止按钮获取焦点显示光标 */
+button {
+  outline: none;
+}
+
+button:focus {
+  outline: none;
+}
+
+/* 防止van-button点击后显示焦点光标 */
+.van-button:focus {
+  outline: none !important;
+}
+
+.van-button:active {
+  outline: none !important;
+}
+
+/* Vant主题色覆盖 */
+:root {
+  --van-primary-color: @primary-color;
+  --van-success-color: @primary-color;
+  --van-danger-color: @primary-color;
+  --van-warning-color: @orange;
 }
 
 /* 页面转场动画 */

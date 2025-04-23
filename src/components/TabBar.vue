@@ -10,19 +10,19 @@
 <script>
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { useCartStore } from '@/stores'
 
 export default {
   name: 'TabBar',
   setup() {
     const route = useRoute()
-    const store = useStore()
+    const cartStore = useCartStore()
     
     // 导航栏激活的选项
     const active = ref(0)
     
     // 购物车商品数量
-    const cartCount = computed(() => store.getters['cart/totalCount'])
+    const cartCount = computed(() => cartStore.totalCount)
     
     // 监听路由变化，设置对应的tabbar激活项
     watch(() => route.path, (path) => {

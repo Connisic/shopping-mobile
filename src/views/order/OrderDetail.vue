@@ -81,7 +81,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { useOrderStore } from '@/stores'
 import { Dialog, Toast } from 'vant'
 import { formatDate } from '@/utils/date'
 
@@ -90,7 +90,7 @@ export default {
   setup() {
     const router = useRouter()
     const route = useRoute()
-    const store = useStore()
+    const orderStore = useOrderStore()
     
     const order = ref(null)
     const countdown = ref(0)
@@ -344,7 +344,7 @@ export default {
     // 取消订单
     const handleCancelOrder = async () => {
       try {
-        await store.dispatch('order/updateOrderStatus', { 
+        await orderStore.updateOrderStatus({ 
           id: order.value.id, 
           status: 'cancelled' 
         })

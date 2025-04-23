@@ -57,20 +57,20 @@
         <div class="payment-options">
           <div class="payment-item" :class="{ 'payment-selected': paymentMethod === 'wechat' }" @click="paymentMethod = 'wechat'">
             <div class="payment-icon wechat">
-              <van-icon name="wechat-pay" color="#07c160" size="28" />
+              <van-icon name="wechat-pay" color="var(--wechat-color)" size="28" />
             </div>
             <span class="payment-name">微信支付</span>
             <div class="payment-select">
-              <div class="select-circle" :style="paymentMethod === 'wechat' ? 'background-color: #07c160; border-color: #07c160;' : ''"></div>
+              <div class="select-circle" :style="paymentMethod === 'wechat' ? 'background-color: var(--wechat-color); border-color: var(--wechat-color);' : ''"></div>
             </div>
           </div>
           <div class="payment-item" :class="{ 'payment-selected': paymentMethod === 'alipay' }" @click="paymentMethod = 'alipay'">
             <div class="payment-icon alipay">
-              <van-icon name="alipay" color="#1677ff" size="28" />
+              <van-icon name="alipay" color="var(--alipay-color)" size="28" />
             </div>
             <span class="payment-name">支付宝</span>
             <div class="payment-select">
-              <div class="select-circle" :style="paymentMethod === 'alipay' ? 'background-color: #1677ff; border-color: #1677ff;' : ''"></div>
+              <div class="select-circle" :style="paymentMethod === 'alipay' ? 'background-color: var(--alipay-color); border-color: var(--alipay-color);' : ''"></div>
             </div>
           </div>
         </div>
@@ -131,7 +131,7 @@
 <script>
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useStore } from 'vuex'
+import { useCartStore, useOrderStore, useUserStore } from '@/stores'
 import { Toast } from 'vant'
 import { formatPrice } from '@/utils'
 
@@ -140,7 +140,9 @@ export default {
   setup() {
     const router = useRouter()
     const route = useRoute()
-    const store = useStore()
+    const cartStore = useCartStore()
+    const orderStore = useOrderStore()
+    const userStore = useUserStore()
     
     const paymentMethod = ref('wechat')
     const showAddressPopup = ref(false)
@@ -157,7 +159,7 @@ export default {
         // 如果是订单支付，返回空数组或者从store获取订单商品
         return []
       } else {
-        return store.getters['cart/checkedItems']
+        return cartStore.checkedItems
       }
     })
     
@@ -166,7 +168,7 @@ export default {
       if (isFromOrder.value) {
         return orderAmount.value
       }
-      return store.getters['cart/checkedAmount']
+      return cartStore.checkedAmount
     })
     
     // 计算商品总数
@@ -178,10 +180,10 @@ export default {
     })
     
     // 获取地址列表
-    const addresses = computed(() => store.state.user.addresses)
+    const addresses = computed(() => userStore.addresses)
     
     // 获取默认地址
-    const defaultAddress = computed(() => store.getters['user/defaultAddress'])
+    const defaultAddress = computed(() => userStore.defaultAddress)
     
     // 返回上一页
     const onClickLeft = () => {
@@ -201,7 +203,7 @@ export default {
     // 选择地址
     const selectAddress = (address) => {
       // 在实际项目中，这里应该调用API设置默认地址
-      store.commit('user/SET_DEFAULT_ADDRESS', address.id)
+      userStore.setDefaultAddress(address.id)
       showAddressPopup.value = false
     }
     
@@ -256,7 +258,7 @@ export default {
       if (isFromOrder.value) {
         try {
           // 支付订单
-          await store.dispatch('order/updateOrderStatus', { 
+          await orderStore.updateOrderStatus({ 
             id: orderId.value, 
             status: 'paid' 
           })
@@ -287,7 +289,7 @@ export default {
       
       try {
         // 创建订单
-        const order = await store.dispatch('order/createOrder', {
+        const order = await orderStore.createOrder({
           addressId: defaultAddress.value.id,
           items: cartItems.value,
           amount: totalAmount.value,
@@ -304,7 +306,7 @@ export default {
         })
         
         // 清空购物车已选商品
-        store.dispatch('cart/clearCheckedItems')
+        cartStore.clearCheckedItems()
       } catch (error) {
         console.error('创建订单失败', error)
         Toast.fail('创建订单失败，请重试')

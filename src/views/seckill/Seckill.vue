@@ -63,7 +63,7 @@
 <script>
 import { onMounted, onUnmounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useSeckillStore } from '@/stores'
 import { Toast } from 'vant'
 import { formatTime } from '@/utils'
 
@@ -71,13 +71,13 @@ export default {
   name: 'SeckillPage',
   setup() {
     const router = useRouter()
-    const store = useStore()
+    const seckillStore = useSeckillStore()
     const loading = ref(true)
     
     // 从store获取秒杀数据
-    const endTime = computed(() => store.getters['seckill/endTime'])
-    const countdown = computed(() => store.getters['seckill/countdown'])
-    const seckillProducts = computed(() => store.getters['seckill/seckillProducts'])
+    const endTime = computed(() => seckillStore.endTime)
+    const countdown = computed(() => seckillStore.countdown)
+    const seckillProducts = computed(() => seckillStore.seckillProducts)
     
     // 定时更新倒计时
     let timer = null
@@ -86,7 +86,7 @@ export default {
     const loadSeckillProducts = async () => {
       try {
         loading.value = true
-        await store.dispatch('seckill/fetchSeckillProducts')
+        await seckillStore.fetchSeckillProducts()
       } catch (error) {
         console.error('加载秒杀商品失败：', error)
         Toast('加载秒杀商品失败，请稍后重试')
@@ -98,10 +98,10 @@ export default {
     // 开始倒计时
     const startCountdown = () => {
       // 立即执行一次
-      store.dispatch('seckill/updateCountdown')
+      seckillStore.updateCountdown()
       // 设置定时器，每秒更新一次
       timer = setInterval(() => {
-        store.dispatch('seckill/updateCountdown')
+        seckillStore.updateCountdown()
       }, 1000)
     }
     

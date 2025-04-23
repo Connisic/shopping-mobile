@@ -24,7 +24,7 @@
 <script>
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useOrderStore } from '@/stores'
 import { Toast } from 'vant'
 import { formatPrice } from '@/utils'
 
@@ -33,13 +33,13 @@ export default {
   setup() {
     const route = useRoute()
     const router = useRouter()
-    const store = useStore()
+    const orderStore = useOrderStore()
     
     // 从路由参数获取订单ID
     const orderId = computed(() => Number(route.query.orderId))
     
     // 获取当前订单
-    const order = computed(() => store.state.order.currentOrder || {})
+    const order = computed(() => orderStore.currentOrder || {})
     
     // 查看订单详情
     const viewOrder = () => {
@@ -89,7 +89,7 @@ export default {
       }
       
       try {
-        await store.dispatch('order/fetchOrderDetail', orderId.value)
+        await orderStore.fetchOrderDetail(orderId.value)
       } catch (error) {
         console.error('获取订单详情失败', error)
         Toast.fail('获取订单详情失败')

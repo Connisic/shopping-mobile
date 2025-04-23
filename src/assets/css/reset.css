@@ -1,0 +1,92 @@
+/* CSS Reset专门用于覆盖浏览器默认样式 */
+
+/* 基本元素默认样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  outline: none !important;
+}
+
+/* 清除所有交互元素的默认外观 */
+a, button, input, textarea, select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+/* 分类处理 */
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Segoe UI, Arial, Roboto, "PingFang SC", "miui", "Hiragino Sans GB", "Microsoft Yahei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #333;
+  line-height: 1.5;
+  background-color: #f5f5f5;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation; /* 改善移动端点击延迟 */
+}
+
+/* 文本相关 */
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+/* 列表相关 */
+ul, ol, li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 表单相关，允许选择文本 */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+/* 图片相关 */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* 表格相关 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* 修复移动端问题 */
+body {
+  /* 防止屏幕旋转时字体大小自动调整 */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 解决移动端点击延迟300ms问题 */
+a, button, input, textarea, select {
+  touch-action: manipulation;
+}
+
+/* 禁止用户选择文本 */
+.no-select {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* 允许用户选择文本 */
+.selectable {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+} 

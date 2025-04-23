@@ -1,0 +1,52 @@
+/**
+ * 移动端点击高亮和焦点问题修复
+ * 这个文件专门用于解决移动设备上点击元素时出现的光标、高亮等问题
+ */
+
+/* 全局禁用所有元素的触摸高亮效果 */
+body {
+  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+}
+
+/* 处理所有可能的交互元素 */
+a, button, div, span, li, input[type="button"], 
+.van-button, .van-tab, .van-tabbar-item, .van-nav-bar__title,
+.van-cell, .van-checkbox, .van-radio, .van-switch,
+.van-slider, [role="button"], [tabindex], [clickable],
+div[class*="item"], div[class*="option"], div[class*="tab"] {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  outline: none !important;
+}
+
+/* 强制覆盖Vant组件库的样式 */
+.van-tab, .van-tabs, .van-tabs__nav, .van-tab__pane,
+.van-tabs__line, .van-tabs__wrap, .van-tabs__content {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  outline: none !important;
+}
+
+/* 处理获得焦点时的样式 */
+*:focus {
+  outline: none !important;
+}
+
+/* 处理活动状态的样式 */
+*:active {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* 保留输入框的文本选择功能 */
+input[type="text"], input[type="number"], input[type="password"],
+input[type="email"], input[type="tel"], input[type="search"],
+input[type="url"], textarea, [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+} 

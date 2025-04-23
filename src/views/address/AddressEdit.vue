@@ -32,7 +32,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Toast, Dialog } from 'vant'
-import { useStore } from 'vuex'
+import { useAddressStore } from '@/stores'
 
 // 提供更完整的省市区数据
 const areaList = {
@@ -108,7 +108,7 @@ export default {
   setup() {
     const router = useRouter()
     const route = useRoute()
-    const store = useStore()
+    const addressStore = useAddressStore()
     
     // 是否为新增地址
     const isAdd = computed(() => route.query.type === 'add')
@@ -138,13 +138,13 @@ export default {
       
       if (isAdd.value) {
         // 新增地址
-        store.dispatch('addAddress', fullAddress).then(() => {
+        addressStore.addAddress(fullAddress).then(() => {
           Toast('添加成功')
           router.back()
         })
       } else {
         // 编辑地址
-        store.dispatch('updateAddress', {
+        addressStore.updateAddress({
           id: currentId.value,
           ...fullAddress
         }).then(() => {
@@ -160,7 +160,7 @@ export default {
         title: '提示',
         message: '确定要删除此地址吗？',
       }).then(() => {
-        store.dispatch('deleteAddress', currentId.value).then(() => {
+        addressStore.deleteAddress(currentId.value).then(() => {
           Toast('删除成功')
           router.back()
         })
@@ -194,7 +194,7 @@ export default {
     // 页面加载时获取地址信息
     onMounted(() => {
       if (!isAdd.value && currentId.value) {
-        const address = store.state.address.list.find(item => item.id === currentId.value)
+        const address = addressStore.list.find(item => item.id === currentId.value)
         if (address) {
           // 查找城市的areaCode
           let cityCode = ''

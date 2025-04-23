@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Toast } from 'vant'
 import router from '@/router'
-import store from '@/store'
+import { useUserStore } from '@/stores/userStore'
 
 // 创建axios实例
 const request = axios.create({
@@ -13,8 +13,9 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   config => {
-    // 从store获取token
-    const token = store.getters['user/token']
+    // 从Pinia获取token
+    const userStore = useUserStore()
+    const token = userStore.token
     
     // 如果有token则添加到请求头
     if (token) {
@@ -41,8 +42,11 @@ request.interceptors.response.use(
       
       // 如果是未登录状态，则跳转到登录页
       if (res.code === 401) {
+        // 获取userStore实例
+        const userStore = useUserStore()
+        
         // 清除用户信息
-        store.dispatch('user/logout')
+        userStore.logout()
         
         // 跳转到登录页面
         router.push(`/login?redirect=${router.currentRoute.value.fullPath}`)
@@ -61,7 +65,12 @@ request.interceptors.response.use(
     
     // 如果是未授权，则跳转到登录页
     if (error.response && error.response.status === 401) {
-      store.dispatch('user/logout')
+      // 获取userStore实例
+      const userStore = useUserStore()
+      
+      // 清除用户信息
+      userStore.logout()
+      
       router.push(`/login?redirect=${router.currentRoute.value.fullPath}`)
     }
     

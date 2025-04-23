@@ -129,7 +129,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
+import { useSeckillStore } from '@/stores'
 import { Toast } from 'vant'
 import { formatTime } from '@/utils'
 
@@ -138,7 +138,7 @@ export default {
   setup() {
     const route = useRoute()
     const router = useRouter()
-    const store = useStore()
+    const seckillStore = useSeckillStore()
     const loading = ref(true)
     const quantity = ref(1)
     const showOrderPopup = ref(false)
@@ -147,8 +147,8 @@ export default {
     const productId = computed(() => Number(route.params.id))
     
     // 从store中获取秒杀数据
-    const countdown = computed(() => store.getters['seckill/countdown'])
-    const currentProduct = computed(() => store.getters['seckill/currentSeckillProduct'])
+    const countdown = computed(() => seckillStore.countdown)
+    const currentProduct = computed(() => seckillStore.currentSeckillProduct)
     
     // 计算最大可购买数量
     const maxBuyQuantity = computed(() => {
@@ -182,7 +182,7 @@ export default {
     const loadProductDetail = async () => {
       try {
         loading.value = true
-        await store.dispatch('seckill/fetchSeckillProductDetail', productId.value)
+        await seckillStore.fetchSeckillProductDetail(productId.value)
       } catch (error) {
         console.error('加载商品详情失败：', error)
         Toast('加载商品详情失败')
@@ -194,10 +194,10 @@ export default {
     // 开始倒计时
     const startCountdown = () => {
       // 立即执行一次
-      store.dispatch('seckill/updateCountdown')
+      seckillStore.updateCountdown()
       // 设置定时器，每秒更新一次
       timer = setInterval(() => {
-        store.dispatch('seckill/updateCountdown')
+        seckillStore.updateCountdown()
       }, 1000)
     }
     
@@ -261,7 +261,7 @@ export default {
         })
         
         // 创建秒杀订单
-        const order = await store.dispatch('seckill/createSeckillOrder', orderData)
+        const order = await seckillStore.createSeckillOrder(orderData)
         
         showOrderPopup.value = false
         Toast.success('抢购成功！')

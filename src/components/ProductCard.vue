@@ -19,7 +19,7 @@
 
 <script>
 import { formatPrice } from '@/utils'
-import { useStore } from 'vuex'
+import { useCartStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import { Toast } from 'vant'
 
@@ -32,7 +32,7 @@ export default {
     }
   },
   setup(props) {
-    const store = useStore()
+    const cartStore = useCartStore()
     const router = useRouter()
     
     // 点击商品卡片跳转到商品详情页
@@ -42,7 +42,7 @@ export default {
     
     // 点击购物车图标添加商品到购物车
     const addToCart = () => {
-      store.dispatch('cart/addToCart', {
+      cartStore.addToCart({
         id: props.product.id,
         title: props.product.title,
         price: props.product.price,

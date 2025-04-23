@@ -1,7 +1,15 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import store from './store'
+import pinia from './stores'
+
+// 引入颜色管理工具
+import { BRAND_COLOR, COLORS } from '@/utils/colors'
+
+// 引入CSS重置样式，必须最先加载
+import '@/assets/css/reset.css'
+// 引入点击高亮修复CSS (必须在Vant样式前引入)
+import '@/assets/css/fix-highlight.css'
 
 // 引入Vant样式
 import 'vant/lib/index.css'
@@ -26,6 +34,10 @@ import '@/styles/dark-override.css'
 import '@/styles/specific-pages-dark.css'
 import '@/styles/extreme-dark.css'
 import '@/styles/order-page.css'
+// 引入按钮焦点修复样式
+import '@/assets/css/global.css'
+// 引入颜色修复CSS（覆盖绿色为红色）- 必须最后加载
+import '@/assets/css/fix-color.css'
 
 // rem适配
 import 'amfe-flexible'
@@ -48,6 +60,14 @@ if (theme === 'dark') {
   document.querySelector('html').className = ''
   isDarkMode.value = false
 }
+
+// 设置Vant全局主题色
+document.documentElement.style.setProperty('--van-primary-color', BRAND_COLOR);
+document.documentElement.style.setProperty('--van-success-color', BRAND_COLOR);
+document.documentElement.style.setProperty('--van-danger-color', BRAND_COLOR);
+document.documentElement.style.setProperty('--van-warning-color', COLORS.WARNING);
+// 直接覆盖Vant的绿色变量
+document.documentElement.style.setProperty('--van-green', BRAND_COLOR);
 
 // 创建Vue实例
 const app = createApp(App)
@@ -106,11 +126,11 @@ Toast.setDefaultOptions({
 
 // 设置Dialog默认选项
 Dialog.setDefaultOptions({
-  confirmButtonColor: '#e53e3e'
+  confirmButtonColor: BRAND_COLOR
 })
 
 // 使用插件
-app.use(store)
+app.use(pinia)
 app.use(router)
 
 // 挂载应用

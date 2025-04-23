@@ -87,14 +87,14 @@
 import { ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Toast, Dialog } from 'vant'
-import { useStore } from 'vuex'
+import { useUserStore } from '@/stores'
 import { bus, isDarkMode } from '@/utils/eventBus'
 
 export default {
   name: 'Settings',
   setup() {
     const router = useRouter()
-    const store = useStore()
+    const userStore = useUserStore()
     
     // 弹窗控制
     const showFontSizePopup = ref(false)
@@ -188,7 +188,7 @@ export default {
       })
         .then(() => {
           // 执行退出登录的逻辑
-          store.dispatch('user/logout')
+          userStore.logout()
           Toast.success('已退出登录')
           router.push('/')
         })
