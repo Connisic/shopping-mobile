@@ -6,23 +6,9 @@
         消息 <span class="badge">(21)</span>
       </div>
       <div class="right-icons">
-        <van-icon name="shopping-cart-o" size="40" />
-        <van-icon name="add-o" size="40" />
+        <van-icon name="shopping-cart-o" class="header-icon" />
+        <van-icon name="add-o" class="header-icon" />
       </div>
-    </div>
-
-    <!-- 搜索栏 -->
-    <div class="search-bar">
-      <van-field
-        v-model="keyword"
-        placeholder="搜索聊天记录"
-        class="search-input"
-        clearable
-      >
-        <template #left-icon>
-          <van-icon name="search" size="18" color="#999" />
-        </template>
-      </van-field>
     </div>
 
     <!-- 最近消息标题 -->
@@ -195,98 +181,151 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
-@import '@/styles/variables.less';
+<style lang="scss" scoped>
+@import '@/styles/variables.scss';
 
 .messages {
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background-color: $background-color;
   padding-bottom: 50px;
   
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    background-color: @primary-color;
+    padding: 12px 16px;
+    background: $primary-gradient;
+    box-shadow: $shadow-md;
     
     .title {
-      font-size: 18px;
-      font-weight: bold;
+      font-size: $font-lg;
+      font-weight: 600;
       color: white;
       
       .badge {
-        font-size: 20px;
+        font-size: $font-xs;
         color: rgba(255, 255, 255, 0.8);
         font-weight: normal;
+        margin-left: 4px;
       }
     }
     
     .right-icons {
       display: flex;
-      gap: 15px;
+      gap: 12px;
       
-      .van-icon {
+      .header-icon {
+        font-size: 22px;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: white;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        
+        &:active {
+          background-color: rgba(255, 255, 255, 0.2);
+          transform: scale(0.95);
+        }
       }
     }
   }
   
   .search-bar {
-    padding: 0 15px 15px;
-    background-color: @primary-color;
+    background-color: var(--primary-color);
+    flex: 1;
+    padding: 0 10px;
     
     .search-input {
       background-color: #f6f6f6;
-      border-radius: 20px;
+      border-radius: 25px;
+      height: 36px;
       
       :deep(.van-field__control) {
         color: #333;
+        text-align: center;
       }
       
       :deep(.van-field__left-icon) {
         margin-right: 6px;
       }
+
+      :deep(.van-field__placeholder) {
+        text-align: center;
+      }
     }
   }
   
   .section-title {
-    padding: 10px 15px;
-    font-size: 14px;
-    color: #666;
-    background-color: #f8f8f8;
+    padding: 12px 16px;
+    font-size: $font-sm;
+    color: $text-secondary;
+    background-color: transparent;
+    position: relative;
+    margin-top: 6px;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 0;
+      height: 1px;
+      background: linear-gradient(to right, rgba($primary-color, 0.2), transparent);
+    }
   }
   
   .message-list {
-    background-color: white;
+    background-color: $card-color;
+    margin: 0 12px;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-lg;
+    overflow: hidden;
     
     .message-item {
       display: flex;
-      padding: 12px 15px;
-      border-bottom: 1px solid #f5f5f5;
+      padding: 16px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+      
+      &:last-child {
+        border-bottom: none;
+      }
       
       &:active {
-        background-color: #f9f9f9;
+        background-color: rgba($primary-color, 0.03);
+        transform: translateX(4px);
       }
       
       .avatar {
         position: relative;
-        margin-right: 12px;
+        margin-right: 14px;
+        
+        .van-image {
+          ::v-deep(img) {
+            border-radius: $radius-md;
+            transition: transform 0.3s ease;
+            box-shadow: $shadow-md;
+          }
+        }
         
         .unread-badge {
           position: absolute;
-          top: 0;
-          right: 0;
-          background-color: @primary-color;
+          top: -2px;
+          right: -2px;
+          background-color: $primary-color;
           color: white;
           font-size: 11px;
-          min-width: 16px;
-          height: 16px;
-          line-height: 16px;
+          min-width: 18px;
+          height: 18px;
+          line-height: 18px;
           text-align: center;
-          border-radius: 8px;
+          border-radius: 9px;
           padding: 0 4px;
-          transform: translate(30%, -30%);
+          box-shadow: 0 2px 4px rgba($primary-color, 0.3);
+          z-index: 2;
         }
       }
       
@@ -297,30 +336,45 @@ export default {
         .message-header {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 4px;
+          margin-bottom: 6px;
           
           .shop-name {
-            font-size: 15px;
-            color: #333;
+            font-size: $font-md;
+            color: $text-primary;
             font-weight: 500;
           }
           
           .message-time {
-            color: #999;
-            font-size: 12px;
+            color: $text-secondary;
+            font-size: $font-xxs;
           }
         }
         
         .message-text {
-          font-size: 13px;
-          color: #666;
+          font-size: $font-sm;
+          color: $text-secondary;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          line-height: 1.5;
           
           &.message-text-unread {
-            color: #333;
-            font-weight: 500;
+            color: $text-primary;
+            font-weight: 600;
+            position: relative;
+            
+            &::before {
+              content: '';
+              position: absolute;
+              left: -8px;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 3px;
+              height: 16px;
+              background-color: $primary-color;
+              border-radius: $radius-sm;
+              opacity: 0.7;
+            }
           }
         }
       }
@@ -329,24 +383,40 @@ export default {
         display: flex;
         align-items: center;
         padding-left: 10px;
+        
+        .van-icon {
+          padding: 6px;
+          border-radius: 50%;
+          transition: all 0.2s ease;
+          
+          &:active {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: scale(1.1);
+          }
+        }
       }
     }
   }
   
   :deep(.van-tabbar) {
     background-color: white;
-    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: $shadow-up;
     
     .van-tabbar-item {
       &--active {
-        color: @primary-color;
+        color: $primary-color;
+        font-weight: 500;
+        
+        .van-icon {
+          transform: translateY(-2px);
+        }
       }
       
       .tabbar-text {
-        font-size: 12px;
-        transform: scale(0.9);
+        font-size: $font-xs;
         display: block;
         margin-top: 2px;
+        transition: all 0.3s;
       }
     }
   }

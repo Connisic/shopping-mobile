@@ -22,7 +22,7 @@
         <!-- 店铺信息 -->
         <div class="shop-info">
           <div class="shop-checkbox">
-            <van-checkbox @click="() => toggleShop(shop)" :checked="shop.checked" icon-size="24" checked-color="#e53e3e" />
+            <van-checkbox @click="() => toggleShop(shop)" :checked="shop.checked" icon-size="24" :checked-color="themeColor" />
           </div>
           <div class="shop-icon-name">
             <van-icon name="shop-o" size="20" class="shop-icon" />
@@ -37,7 +37,7 @@
         <div class="goods-list">
           <div v-for="item in shop.goods" :key="item.id" class="goods-item" @click="viewProduct(item)">
             <div class="item-checkbox">
-              <van-checkbox @click.stop="() => toggleItem(shop, item)" :checked="item.checked" icon-size="24" checked-color="#e53e3e" />
+              <van-checkbox @click.stop="() => toggleItem(shop, item)" :checked="item.checked" icon-size="24" :checked-color="themeColor" />
             </div>
             <div class="goods-content">
               <van-image 
@@ -72,13 +72,26 @@
 
     <!-- 猜你喜欢 -->
     <div class="recommend" v-if="cartList.length">
-      <div class="title">猜你喜欢</div>
-      <!-- 推荐商品列表 -->
-      <div class="recommend-list">
-        <div class="recommend-item" v-for="(item, index) in recommendList" :key="index" @click="viewProduct(item)">
-          <van-image :src="item.image" fit="cover" class="recommend-item-image" radius="4" />
-          <div class="recommend-item-title">{{ item.title }}</div>
-          <div class="recommend-item-price">¥{{ formatPrice(item.price) }}</div>
+      <div class="section-title">猜你喜欢</div>
+      <div class="recommend-grid">
+        <div v-for="(item, index) in recommendList" 
+             :key="index" 
+             class="recommend-item"
+             @click="viewProduct(item)">
+          <div class="image-wrapper">
+            <van-image 
+              :src="item.image" 
+              class="product-image"
+              fit="cover"
+            />
+          </div>
+          <div class="info">
+            <div class="title">{{ item.title }}</div>
+            <div class="price">
+              <span class="symbol">¥</span>
+              <span class="value">{{ formatPrice(item.price) }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -86,7 +99,7 @@
     <!-- 底部结算栏 -->
     <div class="cart-submit-bar" v-if="cartList.length">
       <div class="select-all">
-        <van-checkbox @click="toggleAll" :checked="isAllSelected" icon-size="24" checked-color="#e53e3e" />
+        <van-checkbox @click="toggleAll" :checked="isAllSelected" icon-size="24" :checked-color="themeColor" />
         <span class="select-all-text">全选</span>
       </div>
       <div class="price-info" v-if="!isEdit">
@@ -128,6 +141,9 @@ export default {
     const activeTabbar = ref(2)
     const isEdit = ref(false)
     const loading = ref(false)
+    
+    // 获取主题色 - 使用CSS变量
+    const themeColor = 'var(--primary-color)'
 
     // 购物车数据
     const cartList = ref([
@@ -544,7 +560,8 @@ export default {
       getItemColor,
       getItemSize,
       processProductData,
-      savedSelection
+      savedSelection,
+      themeColor
     }
   }
 }
@@ -563,7 +580,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background-color: @primary-color;
+    background-color: #ff0000 !important;
     color: white;
     position: sticky;
     top: 0;
@@ -623,7 +640,33 @@ export default {
           :deep(.van-checkbox) {
             display: flex;
             align-items: center;
-            justify-content: center;
+            
+            .van-checkbox__icon {
+              width: 20px;
+              height: 20px;
+              border: 1px solid #ddd;
+              border-radius: 50%;
+              background-color: transparent;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              
+              &.van-checkbox__icon--checked {
+                border-color: #ddd;
+                background-color: transparent;
+                
+                .van-icon {
+                  color: @primary-color;
+                  font-weight: bold;
+                  transform: scale(1);
+                }
+              }
+              
+              .van-icon {
+                transform: scale(0);
+                transition: all 0.2s;
+              }
+            }
           }
         }
         
@@ -678,7 +721,33 @@ export default {
             :deep(.van-checkbox) {
               display: flex;
               align-items: center;
-              justify-content: center;
+              
+              .van-checkbox__icon {
+                width: 20px;
+                height: 20px;
+                border: 1px solid #ddd;
+                border-radius: 50%;
+                background-color: transparent;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                
+                &.van-checkbox__icon--checked {
+                  border-color: #ddd;
+                  background-color: transparent;
+                  
+                  .van-icon {
+                    color: @primary-color;
+                    font-weight: bold;
+                    transform: scale(1);
+                  }
+                }
+                
+                .van-icon {
+                  transform: scale(0);
+                  transition: all 0.2s;
+                }
+              }
             }
           }
 
@@ -768,41 +837,85 @@ export default {
   }
 
   .recommend {
-    margin-top: 10px;
+    margin-top: 12px;
+    background: #fff;
     padding: 12px;
-    background-color: #fff;
 
-    .title {
-      margin-bottom: 10px;
-      font-size: 14px;
+    .section-title {
+      font-size: 16px;
       font-weight: 500;
+      color: #333;
+      margin-bottom: 12px;
+      padding-left: 8px;
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 16px;
+        background: @primary-color;
+        border-radius: 2px;
+      }
     }
 
-    .recommend-list {
+    .recommend-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
+      gap: 12px;
       
       .recommend-item {
-        .recommend-item-image {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        
+        .image-wrapper {
           width: 100%;
-          height: 140px;
-          margin-bottom: 6px;
+          padding-bottom: 100%;
+          position: relative;
+          overflow: hidden;
+          
+          .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
         }
         
-        .recommend-item-title {
-          font-size: 13px;
-          color: #333;
-          margin-bottom: 4px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .recommend-item-price {
-          font-size: 14px;
-          color: @primary-color;
-          font-weight: bold;
+        .info {
+          padding: 8px;
+          
+          .title {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+          }
+          
+          .price {
+            margin-top: 4px;
+            color: @primary-color;
+            
+            .symbol {
+              font-size: 12px;
+            }
+            
+            .value {
+              font-size: 16px;
+              font-weight: bold;
+            }
+          }
         }
       }
     }
@@ -825,8 +938,36 @@ export default {
       display: flex;
       align-items: center;
       
-      :deep(.van-checkbox__icon) {
-        border-color: #999;
+      :deep(.van-checkbox) {
+        display: flex;
+        align-items: center;
+        
+        .van-checkbox__icon {
+          width: 20px;
+          height: 20px;
+          border: 1px solid #ddd;
+          border-radius: 50%;
+          background-color: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          
+          &.van-checkbox__icon--checked {
+            border-color: #ddd;
+            background-color: transparent;
+            
+            .van-icon {
+              color: @primary-color;
+              font-weight: bold;
+              transform: scale(1);
+            }
+          }
+          
+          .van-icon {
+            transform: scale(0);
+            transition: all 0.2s;
+          }
+        }
       }
       
       .select-all-text {
@@ -880,6 +1021,19 @@ export default {
   
   :deep(.van-tabbar-item--active) {
     color: @primary-color;
+  }
+
+  // 修改复选框样式
+  :deep(.van-checkbox__icon) {
+    border: 1px solid #ddd !important;
+    background-color: transparent !important;
+    
+    &.van-checkbox__icon--checked {
+      .van-icon {
+        color: @primary-color !important;
+        border-color: #ddd !important;
+      }
+    }
   }
 }
 </style> 

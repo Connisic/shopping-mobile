@@ -11,13 +11,13 @@
     <div class="checkout-content">
       <!-- 收货地址 -->
       <div class="address-card" @click="handleAddressClick">
-        <div v-if="defaultAddress" class="address-info">
+        <div v-if="selectedAddress" class="address-info">
           <div class="address-header">
-            <span class="name">{{ defaultAddress.name }}</span>
-            <span class="tel">{{ defaultAddress.tel }}</span>
+            <span class="name">{{ selectedAddress.name }}</span>
+            <span class="tel">{{ selectedAddress.tel }}</span>
           </div>
           <div class="address-detail">
-            {{ getFullAddress(defaultAddress) }}
+            {{ getFullAddress(selectedAddress) }}
           </div>
         </div>
         <div v-else class="address-empty">
@@ -104,10 +104,10 @@
         </div>
         <div class="address-list">
           <div 
-            v-for="address in addresses" 
+            v-for="address in addressList" 
             :key="address.id" 
             class="address-item"
-            @click="selectAddress(address)"
+            @click="onSelectAddress(address)"
           >
             <div class="item-header">
               <span class="name">{{ address.name }}</span>
@@ -129,7 +129,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore, useOrderStore, useUserStore } from '@/stores'
 import { Toast } from 'vant'
@@ -146,6 +146,8 @@ export default {
     
     const paymentMethod = ref('wechat')
     const showAddressPopup = ref(false)
+    const loading = ref(false)
+    const finished = ref(false)
     
     // 判断是否来自订单页面的支付
     const isFromOrder = computed(() => route.query.from === 'order')
@@ -179,11 +181,50 @@ export default {
       return cartItems.value.reduce((total, item) => total + item.count, 0)
     })
     
-    // 获取地址列表
-    const addresses = computed(() => userStore.addresses)
+    // 初始化地址列表和选中地址
+    const addressList = ref([])
+    const selectedAddress = ref(null)
     
-    // 获取默认地址
-    const defaultAddress = computed(() => userStore.defaultAddress)
+    // 获取地址列表
+    const fetchAddressList = async () => {
+      try {
+        loading.value = true
+        // 这里应该调用真实的API，现在用模拟数据
+        const mockAddresses = [
+          {
+            id: 1,
+            name: '张三',
+            tel: '13800138000',
+            province: '广东省',
+            city: '深圳市',
+            county: '南山区',
+            addressDetail: '科技园南路XX号',
+            isDefault: true
+          },
+          {
+            id: 2,
+            name: '李四',
+            tel: '13800138001',
+            province: '广东省',
+            city: '深圳市',
+            county: '福田区',
+            addressDetail: '福田中心区XX号',
+            isDefault: false
+          }
+        ]
+        
+        addressList.value = mockAddresses
+        // 设置默认选中地址
+        if (addressList.value && addressList.value.length > 0) {
+          selectedAddress.value = addressList.value.find(addr => addr.isDefault) || addressList.value[0]
+        }
+      } catch (error) {
+        console.error('获取地址列表失败:', error)
+        Toast('获取地址列表失败')
+      } finally {
+        loading.value = false
+      }
+    }
     
     // 返回上一页
     const onClickLeft = () => {
@@ -201,55 +242,43 @@ export default {
     }
     
     // 选择地址
-    const selectAddress = (address) => {
-      // 在实际项目中，这里应该调用API设置默认地址
-      userStore.setDefaultAddress(address.id)
+    const onSelectAddress = (address) => {
+      selectedAddress.value = address
       showAddressPopup.value = false
     }
     
-    // 添加新地址
+    // 跳转到添加地址页面
     const goToAddAddress = () => {
       showAddressPopup.value = false
-      // 跳转到添加地址页面，使用replace替代push
-      router.replace({
+      router.push({
         path: '/address/edit',
         query: { 
-          type: 'add',
-          from: 'checkout'
+          from: 'checkout',
+          type: 'add'
         }
       })
     }
     
     // 处理地址点击
     const handleAddressClick = () => {
-      if (addresses.value.length > 0) {
-        // 有地址时，跳转到地址列表页面
-        goToAddressList()
-      } else {
-        // 没有地址时，直接跳转到添加地址页面，使用replace替代push
-        router.replace({
+      if (!addressList.value || addressList.value.length === 0) {
+        // 没有地址时跳转到添加地址页面
+        router.push({
           path: '/address/edit',
           query: { 
-            type: 'add',
-            from: 'checkout'
+            from: 'checkout',
+            type: 'add'
           }
         })
+      } else {
+        // 有地址时显示地址选择弹窗
+        showAddressPopup.value = true
       }
-    }
-    
-    // 跳转到地址列表页面
-    const goToAddressList = () => {
-      router.push({
-        path: '/address',
-        query: { 
-          from: 'checkout'
-        }
-      })
     }
     
     // 提交订单
     const onSubmit = async () => {
-      if (!defaultAddress.value) {
+      if (!selectedAddress.value) {
         Toast('请先添加收货地址')
         return
       }
@@ -290,7 +319,7 @@ export default {
       try {
         // 创建订单
         const order = await orderStore.createOrder({
-          addressId: defaultAddress.value.id,
+          addressId: selectedAddress.value.id,
           items: cartItems.value,
           amount: totalAmount.value,
           paymentMethod: paymentMethod.value
@@ -313,26 +342,31 @@ export default {
       }
     }
     
+    onMounted(() => {
+      fetchAddressList()
+    })
+    
     return {
       paymentMethod,
       showAddressPopup,
       cartItems,
       totalAmount,
       totalCount,
-      addresses,
-      defaultAddress,
+      addressList,
+      selectedAddress,
       isFromOrder,
       orderId,
       orderNo,
       orderAmount,
       onClickLeft,
       getFullAddress,
-      selectAddress,
+      onSelectAddress,
       goToAddAddress,
       onSubmit,
       formatPrice,
       handleAddressClick,
-      goToAddressList
+      loading,
+      finished
     }
   }
 }

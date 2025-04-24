@@ -1,105 +1,82 @@
 <template>
-  <div class="search">
-    <!-- 搜索头部 -->
+  <div class="search-page">
+    <!-- 顶部搜索区 -->
     <div class="search-header">
-      <div class="back" @click="goBack">
-        <van-icon name="arrow-left" />
-      </div>
-      <div class="search-input">
+      <div class="search-bar">
         <van-search
           v-model="keyword"
-          placeholder="高级鸡料包"
+          placeholder="搜索商品"
+          :autofocus="true"
           shape="round"
-          background="transparent"
           @search="onSearch"
-          @clear="onClear"
-          @input="onKeywordInput"
+          @focus="onFocus"
         >
+          <template #left-icon>
+            <van-icon name="search" />
+          </template>
           <template #right-icon>
-            <van-icon name="photograph" class="photo-icon" @click="onTakePhoto" />
+            <van-icon name="clear" v-if="keyword" @click="keyword = ''" />
           </template>
         </van-search>
-      </div>
-      <div class="search-btn" @click="onSearch">搜索</div>
-    </div>
-
-    <!-- 搜索建议 -->
-    <div class="search-suggestions" v-if="showSuggestions && keyword && suggestions.length">
-      <div 
-        v-for="(item, index) in suggestions" 
-        :key="index" 
-        class="suggestion-item"
-        @click="onTagClick(item)"
-      >
-        <van-icon name="search" class="suggestion-icon" />
-        <span v-html="highlightKeyword(item, keyword)"></span>
+        <div class="cancel-btn" @click="onBack">取消</div>
       </div>
     </div>
 
+    <!-- 搜索内容区 -->
+    <div class="search-content">
     <!-- 历史搜索 -->
-    <div class="search-section" v-if="searchHistory.length">
+      <div class="search-section" v-if="showHistory">
       <div class="section-header">
-        <span class="section-title">历史搜索</span>
-        <van-icon name="delete" class="delete-icon" @click="clearHistory" />
+          <div class="title">历史搜索</div>
+          <van-icon name="delete" class="clear-icon" @click="clearHistory" />
       </div>
       <div class="search-tags">
-        <div v-for="(item, index) in searchHistory" 
+          <span 
+            v-for="(item, index) in historyList" 
           :key="index" 
-          class="tag-item"
+            class="tag"
           @click="onTagClick(item)"
         >
           {{ item }}
-        </div>
+          </span>
       </div>
     </div>
 
     <!-- 猜你想搜 -->
     <div class="search-section">
       <div class="section-header">
-        <span class="section-title">猜你想搜</span>
-        <div class="refresh" @click="refreshSuggestions">
-          <van-icon name="replay" class="refresh-icon" />
-          <span>换一批</span>
+          <div class="title">猜你想搜</div>
         </div>
-      </div>
-      <div class="search-grid">
-        <div v-for="(item, index) in suggestions" 
+        <div class="search-tags">
+          <span 
+            v-for="(item, index) in suggestList" 
           :key="index" 
-          class="grid-item"
+            class="tag"
           @click="onTagClick(item)"
         >
           {{ item }}
-        </div>
+          </span>
       </div>
     </div>
 
-    <!-- YY热搜 -->
+      <!-- 热门搜索 -->
     <div class="search-section">
       <div class="section-header">
-        <div class="hot-title">
-          <van-icon name="fire" class="hot-icon" />
-          <span class="section-title">YY热搜</span>
+          <div class="title">热门搜索</div>
         </div>
-        <div class="rank-tabs">
-          <span class="active">榜单</span>
-          <span>明星同款</span>
-        </div>
-      </div>
-      <div class="hot-list">
-        <div v-for="(item, index) in hotSearchList" 
+        <div class="hot-search-list">
+          <div 
+            v-for="(item, index) in hotSearchList" 
           :key="index" 
-          class="hot-item"
+            class="hot-search-item"
           @click="onTagClick(item.keyword)"
         >
-          <div class="rank-num" :class="{ top: index < 3 }">{{ index + 1 }}</div>
-          <div class="hot-content">
+            <div class="rank-num" :class="{'top-rank': index < 3}">
+              <van-icon :name="'bar-chart-' + (index + 1)" v-if="index < 3" />
+              <span v-else>{{ index + 1 }}</span>
+            </div>
             <div class="keyword">{{ item.keyword }}</div>
-            <div class="tag" v-if="item.tag">{{ item.tag }}</div>
-          </div>
-          <div class="hot-count">
-            热度{{ item.count }}万
-            <van-icon name="arrow-up" v-if="item.trending === 'up'" class="trend up" />
-            <van-icon name="arrow-down" v-if="item.trending === 'down'" class="trend down" />
+            <div class="hot-tag" v-if="item.tag">{{ item.tag }}</div>
           </div>
         </div>
       </div>
@@ -108,158 +85,79 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSearchStore } from '@/stores'
-import { Toast } from 'vant'
 
 export default {
   name: 'Search',
   setup() {
     const router = useRouter()
-    const searchStore = useSearchStore()
     const keyword = ref('')
-    
-    // 从store获取历史搜索
-    const searchHistory = ref([])
-    // 搜索建议
-    const suggestions = ref([])
-    // 热搜关键词
-    const hotSearchList = ref([])
-    // 是否显示搜索建议
-    const showSuggestions = ref(false)
+    const showHistory = ref(true)
 
-    // 初始化数据
-    onMounted(async () => {
-      // 获取历史搜索
-      searchHistory.value = searchStore.history
-      
-      // 获取热搜关键词
-      await loadHotKeywords()
-    })
+    // 历史搜索
+    const historyList = ref([
+      '华为手机', 'iPhone 15', '小米手机', '耳机', '充电器'
+    ])
 
-    // 加载热搜关键词
-    const loadHotKeywords = async () => {
-      try {
-        // 使用直接的Pinia属性访问
-        hotSearchList.value = searchStore.hotKeywords.map((keyword, index) => ({
-          id: index,
-          keyword: keyword,
-          tag: '',
-          count: (Math.random() * 100).toFixed(1),
-          trending: Math.random() > 0.3 ? 'up' : 'down'
-        }))
-      } catch (error) {
-        console.error('获取热搜关键词失败', error)
+    // 猜你想搜
+    const suggestList = ref([
+      '手机壳', '数据线', '平板电脑', '智能手表', '蓝牙耳机',
+      '充电宝', '手机支架', '钢化膜'
+    ])
+
+    // 热门搜索
+    const hotSearchList = ref([
+      { keyword: 'iPhone 15 Pro', tag: '新品' },
+      { keyword: '华为 Mate 60', tag: '热门' },
+      { keyword: '小米 14', tag: '新品' },
+      { keyword: 'OPPO Find X7' },
+      { keyword: 'vivo X100' },
+      { keyword: '三星 S24' },
+      { keyword: 'AirPods Pro' },
+      { keyword: '华为手表' },
+      { keyword: '小米平板' },
+      { keyword: 'iPad Pro' }
+    ])
+
+    const onSearch = () => {
+      if (keyword.value.trim()) {
+        // 执行搜索
+        router.push({
+          path: '/search-result',
+          query: { keyword: keyword.value }
+        })
       }
     }
 
-    // 返回上一页
-    const goBack = () => {
+    const onBack = () => {
       router.back()
     }
 
-    // 监听输入，获取搜索建议
-    const onKeywordInput = async () => {
-      if (keyword.value.trim()) {
-        try {
-          // 简单过滤热门搜索词作为建议
-          suggestions.value = searchStore.hotKeywords
-            .filter(item => item.toLowerCase().includes(keyword.value.toLowerCase()))
-            .slice(0, 8)
-          showSuggestions.value = true
-        } catch (error) {
-          console.error('获取搜索建议失败', error)
-        }
-      } else {
-        suggestions.value = []
-        showSuggestions.value = false
-      }
+    const onFocus = () => {
+      showHistory.value = true
     }
 
-    // 搜索
-    const onSearch = () => {
-      if (!keyword.value.trim()) {
-        Toast('请输入搜索关键词')
-        return
-      }
-      
-      // 添加到搜索历史
-      searchStore.addSearchHistory(keyword.value.trim())
-      
-      // 跳转到搜索结果页
-      router.push({
-        path: '/search-results',
-        query: { keyword: keyword.value.trim() }
-      })
+    const clearHistory = () => {
+      historyList.value = []
     }
 
-    // 清空输入框
-    const onClear = () => {
-      keyword.value = ''
-      suggestions.value = []
-      showSuggestions.value = false
-    }
-
-    // 调用相机功能
-    const onTakePhoto = () => {
-      Toast('相机功能暂未实现')
-    }
-
-    // 清空历史记录
-    const clearHistory = async () => {
-      try {
-        await searchStore.clearSearchHistory()
-        searchHistory.value = []
-        Toast('历史记录已清空')
-      } catch (error) {
-        console.error('清空历史记录失败', error)
-      }
-    }
-
-    // 点击标签搜索
     const onTagClick = (tag) => {
       keyword.value = tag
       onSearch()
     }
 
-    // 刷新推荐搜索词
-    const refreshSuggestions = async () => {
-      try {
-        // 随机打乱热词作为推荐
-        suggestions.value = [...searchStore.hotKeywords]
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 8)
-        
-        Toast('已更新推荐')
-      } catch (error) {
-        console.error('刷新推荐搜索词失败', error)
-      }
-    }
-
-    // 高亮关键词
-    const highlightKeyword = (text, keyword) => {
-      if (!keyword || !text) return text
-      
-      const reg = new RegExp(keyword, 'gi')
-      return text.replace(reg, match => `<span class="highlight">${match}</span>`)
-    }
-
     return {
       keyword,
-      searchHistory,
-      suggestions,
+      showHistory,
+      historyList,
+      suggestList,
       hotSearchList,
-      showSuggestions,
-      goBack,
       onSearch,
-      onClear,
-      onKeywordInput,
-      onTakePhoto,
+      onBack,
+      onFocus,
       clearHistory,
-      onTagClick,
-      refreshSuggestions,
-      highlightKeyword
+      onTagClick
     }
   }
 }
@@ -268,138 +166,76 @@ export default {
 <style lang="less" scoped>
 @import '@/styles/variables.less';
 
-.search {
+.search-page {
   min-height: 100vh;
   background-color: #f8f8f8;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1;
 
   .search-header {
+    background: linear-gradient(135deg, @primary-color, darken(@primary-color, 15%));
+    padding: 8px 0;
+
+    .search-bar {
     display: flex;
     align-items: center;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, @primary-color, darken(@primary-color, 10%));
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-
-    .back {
-      padding: 6px;
-      margin-right: 8px;
-      color: #fff;
-      border-radius: 50%;
-      transition: background-color 0.3s;
-      
-      &:active {
-        background-color: rgba(255, 255, 255, 0.2);
-      }
-    }
-
-    .search-input {
-      flex: 1;
+      padding: 0 12px;
 
       :deep(.van-search) {
+        flex: 1;
         padding: 0;
+        background: transparent;
 
         .van-search__content {
-          background-color: rgba(255, 255, 255, 0.9);
-          border-radius: 20px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
+          height: 36px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 
-        .van-field__right-icon {
-          color: #666;
-        }
-        
-        .photo-icon {
-          color: @primary-color;
+          .van-field__left-icon {
+            color: @primary-color;
+          }
+
+          .van-field__right-icon {
+            color: #999;
+            font-size: 16px;
+          }
+          
+          .van-field__control {
+            height: 36px;
+            font-size: 14px;
         }
       }
     }
 
-    .search-btn {
+      .cancel-btn {
       padding: 0 12px;
-      margin-left: 12px;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 500;
-      position: relative;
-      
-      &:active {
-        opacity: 0.8;
-      }
-      
-      &::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 1px;
-        height: 16px;
-        background-color: rgba(255, 255, 255, 0.3);
-      }
-    }
-  }
-
-  .search-suggestions {
-    padding: 16px;
-    background-color: #fff;
-    border-radius: 0 0 12px 12px;
-    margin: 0 12px 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-
-    .suggestion-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      .suggestion-icon {
-        margin-right: 12px;
-        color: #999;
-      }
-
-      span {
         font-size: 14px;
-        color: #333;
-        
-        .highlight {
-          color: @primary-color;
-          font-weight: bold;
-        }
-      }
-      
-      &:active {
-        background-color: rgba(0, 0, 0, 0.02);
+        color: white;
       }
     }
   }
+
+  .search-content {
+    padding: 12px;
 
   .search-section {
-    padding: 20px 16px;
-    margin: 0 12px 12px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      background: white;
+      border-radius: 16px;
+    padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+        margin-bottom: 12px;
       
-      .section-title {
-        font-size: 16px;
-        color: #333;
-        font-weight: 600;
+        .title {
+          font-size: 16px;
+          font-weight: 500;
+          color: #333;
         position: relative;
-        padding-left: 12px;
+          padding-left: 12px;
         
         &::before {
           content: '';
@@ -407,168 +243,75 @@ export default {
           left: 0;
           top: 50%;
           transform: translateY(-50%);
-          width: 4px;
+          width: 3px;
           height: 16px;
-          background-color: @primary-color;
-          border-radius: 2px;
+            background: @primary-color;
+            border-radius: 1.5px;
         }
       }
 
-      .hot-title {
+        .clear-icon {
+          color: #999;
+          font-size: 16px;
+          padding: 4px;
+        }
+      }
+
+      .search-tags {
         display: flex;
-        align-items: center;
+        flex-wrap: wrap;
         gap: 8px;
 
-        .hot-icon {
-          color: @primary-color;
-          font-size: 18px;
-        }
-      }
-
-      .refresh {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        color: #999;
-        font-size: 13px;
-        padding: 6px 12px;
-        background-color: #f8f8f8;
-        border-radius: 16px;
+        .tag {
+          padding: 6px 12px;
+          background: #f5f5f5;
+          color: #666;
+          font-size: 13px;
+          border-radius: 15px;
+        transition: all 0.2s ease;
         
-        .refresh-icon {
-          color: @primary-color;
+        &:active {
+            background: #eee;
+            transform: scale(0.95);
+          }
         }
       }
       
-      .delete-icon {
-        color: #999;
-        font-size: 18px;
-        padding: 6px;
-      }
-
-      .rank-tabs {
-        span {
-          margin-left: 16px;
-          color: #999;
-          font-size: 13px;
-          padding: 4px 12px;
-          border-radius: 16px;
-
-          &.active {
-            color: #fff;
-            background-color: @primary-color;
-            font-weight: 500;
-          }
-        }
-      }
-    }
-
-    .search-tags {
+      .hot-search-list {
+        .hot-search-item {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
+          align-items: center;
+          padding: 10px 0;
 
-      .tag-item {
-        padding: 8px 16px;
-        background-color: #f8f8f8;
-        border-radius: 20px;
-        font-size: 13px;
-        color: #666;
-        transition: all 0.3s;
-        
-        &:active {
-          background-color: rgba(229, 62, 62, 0.1);
-          color: @primary-color;
-        }
-      }
-    }
-
-    .search-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-
-      .grid-item {
-        padding: 12px;
-        background-color: #f8f8f8;
-        border-radius: 8px;
-        font-size: 13px;
-        color: #666;
-        transition: all 0.3s;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-        
-        &:active {
-          background-color: rgba(229, 62, 62, 0.1);
-          color: @primary-color;
-        }
-      }
-    }
-
-    .hot-list {
-      .hot-item {
+          .rank-num {
+            width: 24px;
+            height: 24px;
         display: flex;
         align-items: center;
-        padding: 14px 0;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            justify-content: center;
+            font-size: 14px;
+            color: #999;
+          margin-right: 12px;
 
-        &:last-child {
-          border-bottom: none;
-        }
-
-        .rank-num {
-          width: 22px;
-          height: 22px;
-          line-height: 22px;
-          text-align: center;
-          font-size: 14px;
-          color: #999;
-          font-weight: bold;
-          border-radius: 4px;
-          background-color: #f8f8f8;
-
-          &.top {
-            color: #fff;
-            background-color: @primary-color;
+            &.top-rank {
+              color: @primary-color;
+              font-size: 16px;
+            }
           }
-        }
-
-        .hot-content {
-          flex: 1;
-          margin: 0 12px;
 
           .keyword {
-            font-size: 15px;
+            flex: 1;
+            font-size: 14px;
             color: #333;
-            margin-bottom: 4px;
-            font-weight: 500;
           }
 
-          .tag {
-            display: inline-block;
-            padding: 2px 6px;
-            background-color: rgba(229, 62, 62, 0.1);
-            border-radius: 4px;
-            font-size: 10px;
+          .hot-tag {
+            font-size: 12px;
             color: @primary-color;
-          }
-        }
-
-        .hot-count {
-          font-size: 12px;
-          color: #999;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-
-          .trend {
-            &.up {
-              color: @primary-color;
-            }
-
-            &.down {
-              color: #52c41a;
-            }
+            background: rgba(@primary-color, 0.1);
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
           }
         }
       }

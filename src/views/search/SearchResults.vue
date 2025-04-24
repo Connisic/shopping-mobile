@@ -1,7 +1,9 @@
 <template>
   <div class="search-results">
     <div class="search-header">
-      <van-icon name="arrow-left" class="back-icon" @click="onClickLeft" />
+      <div class="back" @click="onClickLeft">
+        <van-icon name="arrow-left" />
+      </div>
       <van-search
         v-model="keyword"
         placeholder="男士运动外套衬衫"
@@ -12,9 +14,6 @@
         @cancel="onClickLeft"
         @clear="onClear"
       >
-        <template #action>
-          <van-icon name="search" size="18" class="search-icon" />
-        </template>
       </van-search>
     </div>
     
@@ -339,10 +338,16 @@ export default {
     z-index: 100;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     
-    .back-icon {
-      font-size: 20px;
+    .back {
+      padding: 6px;
       margin-right: 8px;
       color: #fff;
+      border-radius: 50%;
+      transition: background-color 0.3s;
+      
+      &:active {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
     }
     
     :deep(.van-search) {

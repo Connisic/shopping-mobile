@@ -3,9 +3,9 @@
  */
 
 // 品牌颜色
-export const BRAND_COLOR = '#ff0000'
-export const BRAND_COLOR_DARK = '#cc0000' // darken 10%
-export const BRAND_COLOR_LIGHT = '#ff9999' // lighten 30%
+export const BRAND_COLOR = '#ee0a24'
+export const BRAND_COLOR_DARK = '#d60920' // darken 10%
+export const BRAND_COLOR_LIGHT = '#f5919c' // lighten 30%
 
 // 主题颜色映射
 export const COLORS = {
@@ -60,16 +60,16 @@ export function getThemeColor(colorKey, theme = 'light') {
   if (theme === 'dark') {
     // 深色模式下的颜色映射
     const darkColors = {
-      [COLORS.PRIMARY]: '#ff3333',
-      [COLORS.WECHAT]: '#ff3333',
-      [COLORS.GREEN]: '#ff3333',
+      [COLORS.PRIMARY]: '#f5293d',
+      [COLORS.WECHAT]: '#f5293d',
+      [COLORS.GREEN]: '#f5293d',
       [COLORS.BLUE]: '#59b6ff',
       [COLORS.ALIPAY]: '#4c99ff',
       [COLORS.QQ]: '#33a0ff',
       [COLORS.WEIBO]: '#ff4d66',
       [COLORS.STATUS_PENDING]: '#ffb191',
       [COLORS.STATUS_PAID]: '#4ca4ff',
-      [COLORS.STATUS_DELIVERED]: '#ff3333',
+      [COLORS.STATUS_DELIVERED]: '#f5293d',
       [COLORS.STATUS_COMPLETED]: '#b8b8b8',
       [COLORS.STATUS_CANCELLED]: '#b8b8b8',
     }

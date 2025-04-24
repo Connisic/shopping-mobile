@@ -31,10 +31,6 @@ export default {
     
     onMounted(() => {
       bus.on('theme-change', onThemeChange)
-      
-      // 设置Vant主题色
-      document.documentElement.style.setProperty('--van-primary-color', '#e53e3e');
-      document.documentElement.style.setProperty('--van-success-color', '#e53e3e');
     })
     
     onBeforeUnmount(() => {
@@ -179,14 +175,6 @@ button:focus {
 
 .van-button:active {
   outline: none !important;
-}
-
-/* Vant主题色覆盖 */
-:root {
-  --van-primary-color: @primary-color;
-  --van-success-color: @primary-color;
-  --van-danger-color: @primary-color;
-  --van-warning-color: @orange;
 }
 
 /* 页面转场动画 */

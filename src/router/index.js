@@ -107,6 +107,14 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: () => import('../views/user/Register.vue')
+  },
+  {
+    path: '/product/review',
+    name: 'Review',
+    component: () => import('@/views/product/Review.vue'),
+    meta: {
+      title: '商品评价'
+    }
   }
 ]
 

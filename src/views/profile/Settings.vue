@@ -28,11 +28,7 @@
               <van-switch v-model="settings.notification" size="20" />
             </template>
           </van-cell>
-          <van-cell title="深色模式">
-            <template #right-icon>
-              <van-switch v-model="settings.darkMode" size="20" />
-            </template>
-          </van-cell>
+          <ThemeSwitch />
           <van-cell title="字体大小" is-link @click="showFontSizePopup = true">
             <template #value>
               <span>{{ fontSizeOptions[settings.fontSize] }}</span>
@@ -84,14 +80,19 @@
 </template>
 
 <script>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { Toast, Dialog } from 'vant'
 import { useUserStore } from '@/stores'
 import { bus, isDarkMode } from '@/utils/eventBus'
+import ThemeSwitch from '@/components/ThemeSwitch.vue'
+import { toggleTheme, getCurrentTheme, THEME_TYPES } from '@/utils/theme'
 
 export default {
   name: 'Settings',
+  components: {
+    ThemeSwitch
+  },
   setup() {
     const router = useRouter()
     const userStore = useUserStore()
@@ -102,30 +103,31 @@ export default {
     // 设置选项
     const settings = reactive({
       notification: true,
-      darkMode: isDarkMode.value,
       fontSize: 1, // 0: 小, 1: 中, 2: 大
     })
     
-    // 监听深色模式切换
-    watch(() => settings.darkMode, (newVal) => {
-      if (newVal) {
-        document.documentElement.setAttribute('data-theme', 'dark')
-        document.documentElement.classList.add('dark')
-        document.body.classList.add('dark')
-        document.querySelector('html').className = 'dark'
-        localStorage.setItem('theme', 'dark')
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light')
-        document.documentElement.classList.remove('dark')
-        document.body.classList.remove('dark')
-        document.querySelector('html').className = ''
-        localStorage.setItem('theme', 'light')
+    // 初始化时检查当前主题
+    const currentTheme = getCurrentTheme();
+    
+    // 监听主题变化事件
+    const handleThemeChange = (event) => {
+      if (event && event.detail) {
+        isDarkMode.value = event.detail.theme === THEME_TYPES.DARK;
+      } else if (event) {
+        isDarkMode.value = event === 'dark';
       }
-      
-      // 发送主题变化事件
-      bus.emit('theme-change', newVal ? 'dark' : 'light')
-      isDarkMode.value = newVal
-    })
+    };
+    
+    // 添加和移除事件监听器
+    onMounted(() => {
+      window.addEventListener('theme-change', handleThemeChange);
+      bus.on('theme-change', handleThemeChange);
+    });
+    
+    onBeforeUnmount(() => {
+      window.removeEventListener('theme-change', handleThemeChange);
+      bus.off('theme-change', handleThemeChange);
+    });
     
     // 字体大小选项
     const fontSizeOptions = ['小', '中', '大']

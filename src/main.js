@@ -5,6 +5,8 @@ import pinia from './stores'
 
 // 引入颜色管理工具
 import { BRAND_COLOR, COLORS } from '@/utils/colors'
+// 引入主题管理工具
+import ThemeManager, { initTheme } from '@/utils/theme'
 
 // 引入CSS重置样式，必须最先加载
 import '@/assets/css/reset.css'
@@ -28,12 +30,10 @@ import {
 
 // 引入全局样式
 import '@/styles/global.less'
-import '@/styles/theme.less'
-import '@/styles/vant-dark.css'
-import '@/styles/dark-override.css'
-import '@/styles/specific-pages-dark.css'
-import '@/styles/extreme-dark.css'
-import '@/styles/order-page.css'
+// 引入新的SCSS主题系统
+import '@/styles/theme/theme.scss'
+// 引入Vant自定义样式优化
+import '@/styles/vant-custom.scss'
 // 引入按钮焦点修复样式
 import '@/assets/css/global.css'
 // 引入颜色修复CSS（覆盖绿色为红色）- 必须最后加载
@@ -45,29 +45,10 @@ import 'amfe-flexible'
 // 引入事件总线和全局状态
 import { isDarkMode } from '@/utils/eventBus'
 
-// 初始化主题
-const theme = localStorage.getItem('theme') || 'light'
-document.documentElement.setAttribute('data-theme', theme)
-// 设置Vant深色模式
-if (theme === 'dark') {
-  document.documentElement.classList.add('dark')
-  document.body.classList.add('dark')
-  document.querySelector('html').className = 'dark'
-  isDarkMode.value = true
-} else {
-  document.documentElement.classList.remove('dark')
-  document.body.classList.remove('dark')
-  document.querySelector('html').className = ''
-  isDarkMode.value = false
-}
-
-// 设置Vant全局主题色
-document.documentElement.style.setProperty('--van-primary-color', BRAND_COLOR);
-document.documentElement.style.setProperty('--van-success-color', BRAND_COLOR);
-document.documentElement.style.setProperty('--van-danger-color', BRAND_COLOR);
-document.documentElement.style.setProperty('--van-warning-color', COLORS.WARNING);
-// 直接覆盖Vant的绿色变量
-document.documentElement.style.setProperty('--van-green', BRAND_COLOR);
+// 初始化主题 - 使用新的主题管理系统
+initTheme();
+// 将旧系统主题状态与新系统同步
+isDarkMode.value = ThemeManager.getCurrentTheme() === ThemeManager.THEME_TYPES.DARK;
 
 // 创建Vue实例
 const app = createApp(App)
@@ -132,6 +113,9 @@ Dialog.setDefaultOptions({
 // 使用插件
 app.use(pinia)
 app.use(router)
+
+// 暴露全局API
+app.config.globalProperties.$theme = ThemeManager;
 
 // 挂载应用
 app.mount('#app')

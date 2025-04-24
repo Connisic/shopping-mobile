@@ -1,0 +1,66 @@
+@import './_mixins.scss';
+
+// 全局根元素样式
+:root {
+  // 主题色变量
+  --primary-color: #{map-get(map-get($themes, light), primary-color)};
+  --background-color: #{map-get(map-get($themes, light), background-color)};
+  --card-background: #{map-get(map-get($themes, light), card-background)};
+  --text-color: #{map-get(map-get($themes, light), text-color)};
+  --text-color-secondary: #{map-get(map-get($themes, light), text-color-secondary)};
+  --text-color-placeholder: #{map-get(map-get($themes, light), text-color-placeholder)};
+  --border-color: #{map-get(map-get($themes, light), border-color)};
+  --success-color: #{map-get(map-get($themes, light), success-color)};
+  --warning-color: #{map-get(map-get($themes, light), warning-color)};
+  --danger-color: #{map-get(map-get($themes, light), danger-color)};
+  --info-color: #{map-get(map-get($themes, light), info-color)};
+  
+  // Vant组件主题色
+  --van-primary-color: var(--primary-color);
+  --van-success-color: var(--success-color);
+  --van-danger-color: var(--danger-color);
+  --van-warning-color: var(--warning-color);
+  --van-text-color: var(--text-color);
+  --van-text-color-2: var(--text-color-secondary);
+  --van-text-color-3: var(--text-color-placeholder);
+  --van-active-color: var(--primary-color);
+  --van-border-color: var(--border-color);
+  --van-background: var(--background-color);
+  --van-background-2: var(--card-background);
+}
+
+// 深色模式
+[data-theme='dark'] {
+  --primary-color: #{map-get(map-get($themes, dark), primary-color)};
+  --background-color: #{map-get(map-get($themes, dark), background-color)};
+  --card-background: #{map-get(map-get($themes, dark), card-background)};
+  --text-color: #{map-get(map-get($themes, dark), text-color)};
+  --text-color-secondary: #{map-get(map-get($themes, dark), text-color-secondary)};
+  --text-color-placeholder: #{map-get(map-get($themes, dark), text-color-placeholder)};
+  --border-color: #{map-get(map-get($themes, dark), border-color)};
+  --success-color: #{map-get(map-get($themes, dark), success-color)};
+  --warning-color: #{map-get(map-get($themes, dark), warning-color)};
+  --danger-color: #{map-get(map-get($themes, dark), danger-color)};
+  --info-color: #{map-get(map-get($themes, dark), info-color)};
+}
+
+// 全局基础样式
+body {
+  @include themed(background-color, background-color);
+  @include themed(color, text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// 按钮样式
+.button-primary {
+  @include themed(background-color, primary-color);
+  @include themed(color, text-color);
+  @include themed(border-color, primary-color);
+}
+
+// 卡片样式
+.card {
+  @include themed(background-color, card-background);
+  @include themed(color, text-color);
+  @include themed(border-color, border-color);
+} 
