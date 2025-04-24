@@ -13,7 +13,7 @@ const userAPI = {
    */
   register(data) {
     return request({
-      url: `${API_BASE_URL}/user/register`,
+      url: `/user/shoppingUser/register`,
       method: 'post',
       data
     })
@@ -32,8 +32,8 @@ const userAPI = {
   login(data) {
     // 根据登录类型选择不同的接口
     const url = data.loginType === 'sms' 
-      ? `${API_BASE_URL}/user/loginByCode` 
-      : `${API_BASE_URL}/user/login`
+      ? `/user/shoppingUser/loginCheckCode` 
+      : `/user/shoppingUser/loginPassword`
     
     return request({
       url,
@@ -45,13 +45,18 @@ const userAPI = {
   /**
    * 获取验证码
    * @param {string} phone 手机号
+   * @param {boolean} isLogin 是否是登录验证码
    * @returns {Promise}
    */
-  getVerifyCode(phone) {
+  getVerifyCode(phone, isLogin = false) {
+    const url = isLogin 
+      ? `/user/shoppingUser/sendLoginCheckCode` 
+      : `/user/shoppingUser/sendMessage`
+    
     return request({
-      url: `${API_BASE_URL}/user/verify-code`,
-      method: 'post',
-      data: { phone }
+      url,
+      method: 'get',
+      params: { phone }
     })
   },
 
@@ -61,7 +66,7 @@ const userAPI = {
    */
   getUserInfo() {
     return request({
-      url: `${API_BASE_URL}/user/info`,
+      url: `/user/shoppingUser/getName`,
       method: 'get'
     })
   },
@@ -73,7 +78,7 @@ const userAPI = {
    */
   updateUserInfo(data) {
     return request({
-      url: `${API_BASE_URL}/user/info`,
+      url: `/user/info`,
       method: 'put',
       data
     })
@@ -88,7 +93,7 @@ const userAPI = {
    */
   changePassword(data) {
     return request({
-      url: `${API_BASE_URL}/user/password`,
+      url: `/user/password`,
       method: 'put',
       data
     })
@@ -100,7 +105,7 @@ const userAPI = {
    */
   logout() {
     return request({
-      url: `${API_BASE_URL}/user/logout`,
+      url: `/user/logout`,
       method: 'post'
     })
   }

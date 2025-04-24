@@ -6,7 +6,7 @@ import request from './request'
  */
 export function getCartList() {
   return request({
-    url: '/user/cart/list',
+    url: '/user/cart/findCartList',
     method: 'get'
   })
 }
@@ -18,7 +18,7 @@ export function getCartList() {
  */
 export function addToCart(cartItem) {
   return request({
-    url: '/user/cart/add',
+    url: '/user/cart/addCart',
     method: 'post',
     data: cartItem
   })
@@ -32,9 +32,9 @@ export function addToCart(cartItem) {
  */
 export function updateCartItemQuantity(goodId, num) {
   return request({
-    url: '/user/cart/updateNum',
-    method: 'put',
-    data: {
+    url: '/user/cart/handleCart',
+    method: 'get',
+    params: {
       goodId,
       num
     }
@@ -48,8 +48,11 @@ export function updateCartItemQuantity(goodId, num) {
  */
 export function removeFromCart(goodId) {
   return request({
-    url: `/user/cart/delete/${goodId}`,
-    method: 'delete'
+    url: '/user/cart/deleteCart',
+    method: 'delete',
+    params: {
+      goodId
+    }
   })
 }
 

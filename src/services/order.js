@@ -7,7 +7,7 @@ import request from './request'
  */
 export function createOrder(orderData) {
   return request({
-    url: '/user/order/create',
+    url: '/user/order/orders/add',
     method: 'post',
     data: orderData
   })
@@ -22,12 +22,10 @@ export function createOrder(orderData) {
  */
 export function getUserOrders(status, page = 1, size = 10) {
   return request({
-    url: '/user/order/list',
+    url: '/user/order/orders/findUserOrders',
     method: 'get',
     params: {
-      status,
-      page,
-      size
+      status
     }
   })
 }
@@ -39,8 +37,9 @@ export function getUserOrders(status, page = 1, size = 10) {
  */
 export function getOrderDetail(id) {
   return request({
-    url: `/user/order/detail/${id}`,
-    method: 'get'
+    url: '/user/order/orders/findById',
+    method: 'get',
+    params: { id }
   })
 }
 
@@ -78,9 +77,9 @@ export function deleteOrder(id) {
  */
 export function payOrder(id, paymentType) {
   return request({
-    url: `/user/order/pay/${id}`,
+    url: `/user/order/payment/pcPay`,
     method: 'post',
-    data: { paymentType }
+    params: { orderId: id }
   })
 }
 
@@ -91,8 +90,9 @@ export function payOrder(id, paymentType) {
  */
 export function generatePayQRCode(id) {
   return request({
-    url: `/user/order/payCode/${id}`,
-    method: 'get'
+    url: `/user/order/payment/pcPay`,
+    method: 'post',
+    params: { orderId: id }
   })
 }
 
@@ -115,7 +115,7 @@ export function confirmReceive(id) {
  */
 export function addAddress(address) {
   return request({
-    url: '/user/address/add',
+    url: '/user/order/address/add',
     method: 'post',
     data: address
   })
@@ -128,7 +128,7 @@ export function addAddress(address) {
  */
 export function updateAddress(address) {
   return request({
-    url: '/user/address/update',
+    url: '/user/order/address/update',
     method: 'put',
     data: address
   })
@@ -141,8 +141,9 @@ export function updateAddress(address) {
  */
 export function deleteAddress(id) {
   return request({
-    url: `/user/address/delete/${id}`,
-    method: 'delete'
+    url: '/user/order/address/delete',
+    method: 'delete',
+    params: { id }
   })
 }
 
@@ -152,7 +153,7 @@ export function deleteAddress(id) {
  */
 export function getAddressList() {
   return request({
-    url: '/user/address/list',
+    url: '/user/order/address/findByUser',
     method: 'get'
   })
 }
@@ -175,7 +176,7 @@ export function setDefaultAddress(id) {
  */
 export function getProvinces() {
   return request({
-    url: '/user/region/provinces',
+    url: '/user/order/address/findAllProvince',
     method: 'get'
   })
 }
@@ -187,8 +188,9 @@ export function getProvinces() {
  */
 export function getCities(provinceId) {
   return request({
-    url: `/user/region/cities/${provinceId}`,
-    method: 'get'
+    url: '/user/order/address/findCityByProvince',
+    method: 'get',
+    params: { provinceId }
   })
 }
 
@@ -199,7 +201,8 @@ export function getCities(provinceId) {
  */
 export function getDistricts(cityId) {
   return request({
-    url: `/user/region/districts/${cityId}`,
-    method: 'get'
+    url: '/user/order/address/findAreaByCity',
+    method: 'get',
+    params: { cityId }
   })
 } 

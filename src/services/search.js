@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import { API_BASE_URL } from '@/constants'
 
 /**
  * 热门搜索关键词
@@ -8,9 +7,9 @@ import { API_BASE_URL } from '@/constants'
  */
 export function getHotSearchKeywords(limit = 10) {
   return request({
-    url: `${API_BASE_URL}/search/hot-keywords`,
+    url: `/user/goodsSearch/autoSuggest`,
     method: 'get',
-    params: { limit }
+    params: { keyword: '' }
   })
 }
 
@@ -20,7 +19,7 @@ export function getHotSearchKeywords(limit = 10) {
  */
 export function getSearchHistory() {
   return request({
-    url: `${API_BASE_URL}/search/history`,
+    url: `/search/history`,
     method: 'get'
   })
 }
@@ -31,7 +30,7 @@ export function getSearchHistory() {
  */
 export function clearSearchHistory() {
   return request({
-    url: `${API_BASE_URL}/search/history`,
+    url: `/search/history`,
     method: 'delete'
   })
 }
@@ -43,7 +42,7 @@ export function clearSearchHistory() {
  */
 export function deleteSearchHistoryItem(keyword) {
   return request({
-    url: `${API_BASE_URL}/search/history/${encodeURIComponent(keyword)}`,
+    url: `/search/history/${encodeURIComponent(keyword)}`,
     method: 'delete'
   })
 }
@@ -63,9 +62,9 @@ export function deleteSearchHistoryItem(keyword) {
  */
 export function searchProducts(params) {
   return request({
-    url: `${API_BASE_URL}/search/products`,
-    method: 'get',
-    params
+    url: `/user/goodsSearch/search`,
+    method: 'post',
+    data: params
   })
 }
 
@@ -77,12 +76,22 @@ export function searchProducts(params) {
  */
 export function getSearchSuggestions(keyword, limit = 10) {
   return request({
-    url: `${API_BASE_URL}/search/suggestions`,
+    url: `/user/goodsSearch/autoSuggest`,
     method: 'get',
-    params: { 
-      keyword,
-      limit
-    }
+    params: { keyword }
+  })
+}
+
+/**
+ * 获取商品描述
+ * @param {Number} id 商品ID
+ * @returns {Promise} 商品描述数据
+ */
+export function getProductDesc(id) {
+  return request({
+    url: `/user/goodsSearch/findDesc`,
+    method: 'get',
+    params: { id }
   })
 }
 
@@ -93,7 +102,7 @@ export function getSearchSuggestions(keyword, limit = 10) {
  */
 export function getSearchFilters(keyword) {
   return request({
-    url: `${API_BASE_URL}/search/filters`,
+    url: `/search/filters`,
     method: 'get',
     params: { keyword }
   })
@@ -106,5 +115,6 @@ export default {
   deleteSearchHistoryItem,
   searchProducts,
   getSearchSuggestions,
+  getProductDesc,
   getSearchFilters
 } 

@@ -5,7 +5,7 @@ import { useUserStore } from '@/stores/userStore'
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: '', // API基础URL
+  baseURL: 'http://localhost:8082/api', // API基础URL
   timeout: 15000, // 请求超时时间
   withCredentials: true // 允许跨域携带cookie
 })

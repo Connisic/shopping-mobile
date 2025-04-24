@@ -22,18 +22,18 @@ module.exports = defineConfig({
         `
       }
     },
+  },
+  devServer: {
+    port: 8081,   
+    // 代理服务器
+	proxy: {
+		'/': {
+			target: 'http://localhost:8082/',
+			changeOrigin: true,  
+				// pathRewrite: {
+				//   '^/api': ''  
+				// }
+		}
+	}
   }
-  // devServer: {
-  //   port: 8081,   
-  //   // 代理服务器
-	// proxy: {
-	// 	'/': {
-	// 		target: 'http://www.yyshopping.com/',
-	// 		changeOrigin: true,  
-	// 			// pathRewrite: {
-	// 			//   '^/api': ''  
-	// 			// }
-	// 	}
-	// }
-  // }
 })

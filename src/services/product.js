@@ -26,9 +26,9 @@ export function getCategories() {
  */
 export function getProductList(params) {
   return request({
-    url: '/user/goods/search',
-    method: 'get',
-    params
+    url: '/user/goodsSearch/search',
+    method: 'post',
+    data: params
   })
 }
 
@@ -39,21 +39,23 @@ export function getProductList(params) {
  */
 export function getProductDetail(id) {
   return request({
-    url: `/user/goods/detail/${id}`,
-    method: 'get'
+    url: `/user/goodsSearch/findDesc`,
+    method: 'get',
+    params: { id }
   })
 }
 
 /**
  * 获取推荐商品列表
- * @param {Number} [count=6] 获取数量
+ * @param {Number} [page=0] 页码
+ * @param {Number} [size=6] 获取数量
  * @returns {Promise} 推荐商品列表数据
  */
-export function getRecommendProducts(count = 6) {
+export function getRecommendProducts(page = 0, size = 6) {
   return request({
-    url: '/user/goods/recommend',
+    url: '/user/recommend/searchPage',
     method: 'get',
-    params: { count }
+    params: { page, size }
   })
 }
 
@@ -95,9 +97,22 @@ export function getSimilarProducts(id, count = 6) {
  */
 export function getProductReviews(id, params) {
   return request({
-    url: `/user/goods/reviews/${id}`,
+    url: `/user/recommend/getComment`,
     method: 'get',
     params
+  })
+}
+
+// 发表商品评价
+export function addProductReview(goodsId, comment, score) {
+  return request({
+    url: '/user/recommend/addComment',
+    method: 'post',
+    params: {
+      goodsId,
+      comment,
+      score
+    }
   })
 }
 

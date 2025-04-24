@@ -1,5 +1,5 @@
 // API基础URL
-export const API_BASE_URL = ''
+export const API_BASE_URL = 'http://localhost:8082/api'
 
 // 本地存储的Key
 export const STORAGE_KEYS = {
