@@ -2,6 +2,28 @@ import { defineStore } from 'pinia'
 import { cartAPI } from '@/services'
 import { Toast } from 'vant'
 
+// 购物车假数据
+const mockCartItems = [
+  {
+    id: 1,
+    goodId: 1,
+    goodsName: '时尚休闲连衣裙夏季新款',
+    price: 128.00,
+    headerPic: 'https://img01.yzcdn.cn/vant/cat.jpeg',
+    num: 1,
+    checked: true
+  },
+  {
+    id: 2,
+    goodId: 2,
+    goodsName: '简约百搭男士T恤纯棉短袖',
+    price: 69.90,
+    headerPic: 'https://img01.yzcdn.cn/vant/cat.jpeg',
+    num: 2,
+    checked: true
+  }
+]
+
 export const useCartStore = defineStore('cart', {
   state: () => ({
     cartItems: []
@@ -94,12 +116,24 @@ export const useCartStore = defineStore('cart', {
     async fetchCartList() {
       try {
         const response = await cartAPI.getCartList()
-        this.setCartItems(response.data)
-        return response.data
+        if (response && response.data && response.data.length > 0) {
+          // 使用后端返回的数据
+          this.setCartItems(response.data)
+          console.log('使用后端购物车数据')
+          return response.data
+        } else {
+          // 后端没有返回有效数据，使用假数据
+          this.setCartItems(mockCartItems)
+          console.log('使用假购物车数据')
+          return mockCartItems
+        }
       } catch (error) {
         console.error('获取购物车失败：', error)
-        Toast('获取购物车失败')
-        return []
+        Toast('获取购物车失败，显示模拟数据')
+        // 请求失败，使用假数据
+        this.setCartItems(mockCartItems)
+        console.log('API错误，使用假购物车数据')
+        return mockCartItems
       }
     },
     
@@ -116,35 +150,74 @@ export const useCartStore = defineStore('cart', {
           specificationValues: item.specificationValues || ''
         }
         
-        await cartAPI.addToCart(cartItem)
-        this.addItemToCart(cartItem)
-        Toast.success('已加入购物车')
+        const response = await cartAPI.addToCart(cartItem)
+        if (response && response.code === 200) {
+          // API成功
+          this.addItemToCart(cartItem)
+          Toast.success('已加入购物车')
+        } else {
+          // API返回错误，仍添加到本地
+          this.addItemToCart(cartItem)
+          Toast.success('已加入本地购物车')
+          console.log('API返回错误，添加到本地购物车')
+        }
       } catch (error) {
         console.error('添加到购物车失败：', error)
-        Toast.fail('添加失败，请重试')
+        // 依然添加到本地购物车
+        const cartItem = {
+          goodId: item.id,
+          goodsName: item.title,
+          price: item.price,
+          num: item.count || 1,
+          headerPic: item.image,
+          specificationValues: item.specificationValues || ''
+        }
+        this.addItemToCart(cartItem)
+        Toast.success('已加入本地购物车')
+        console.log('API错误，添加到本地购物车')
       }
     },
     
     // 更新购物车商品数量
     async updateCartItem({ goodId, num }) {
       try {
-        await cartAPI.updateCartItemQuantity(goodId, num)
-        this.updateCartItemQuantity({ goodId, num })
+        const response = await cartAPI.updateCartItemQuantity(goodId, num)
+        if (response && response.code === 200) {
+          // API成功
+          this.updateCartItemQuantity({ goodId, num })
+        } else {
+          // API返回错误，仍更新本地
+          this.updateCartItemQuantity({ goodId, num })
+          console.log('API返回错误，更新本地购物车')
+        }
       } catch (error) {
         console.error('更新购物车失败：', error)
-        Toast.fail('更新失败，请重试')
+        // 依然更新本地购物车
+        this.updateCartItemQuantity({ goodId, num })
+        console.log('API错误，更新本地购物车')
       }
     },
     
     // 从购物车中移除商品
     async removeCartItem(goodId) {
       try {
-        await cartAPI.removeFromCart(goodId)
-        this.removeCartItemLocally(goodId)
-        Toast.success('已从购物车移除')
+        const response = await cartAPI.removeFromCart(goodId)
+        if (response && response.code === 200) {
+          // API成功
+          this.removeCartItemLocally(goodId)
+          Toast.success('已从购物车移除')
+        } else {
+          // API返回错误，仍从本地移除
+          this.removeCartItemLocally(goodId)
+          Toast.success('已从本地购物车移除')
+          console.log('API返回错误，从本地购物车移除')
+        }
       } catch (error) {
         console.error('移除购物车商品失败：', error)
-        Toast.fail('移除失败，请重试')
+        // 依然从本地购物车移除
+        this.removeCartItemLocally(goodId)
+        Toast.success('已从本地购物车移除')
+        console.log('API错误，从本地购物车移除')
       }
     }
   }

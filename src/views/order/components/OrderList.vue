@@ -128,7 +128,8 @@ export default {
     
     // 获取订单总数量
     const getTotalCount = (items) => {
-      return items.reduce((total, item) => total + item.count, 0)
+      if (!items || !items.length) return 0
+      return items.reduce((total, item) => total + (item.count || 0), 0)
     }
     
     // 格式化价格

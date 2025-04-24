@@ -244,11 +244,17 @@ export default {
       try {
         passwordLoginLoading.value = true
         
+        // 添加调试日志
+        console.log('Login form data:', passwordForm.value)
+        
         // 调用登录接口
-        await userStore.login({
+        const response = await userStore.login({
           username: passwordForm.value.username,
           password: passwordForm.value.password
         })
+        
+        // 添加调试日志
+        console.log('Login response:', response)
         
         Toast.success('登录成功')
         
@@ -257,6 +263,7 @@ export default {
         router.replace(redirectUrl)
       } catch (error) {
         console.error('登录失败', error)
+        Toast.fail(error.message || '登录失败')
       } finally {
         passwordLoginLoading.value = false
       }

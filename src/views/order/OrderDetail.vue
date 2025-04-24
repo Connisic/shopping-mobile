@@ -84,6 +84,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { useOrderStore } from '@/stores'
 import { Dialog, Toast } from 'vant'
 import { formatDate } from '@/utils/date'
+import { getOrderDetail } from '@/services/order' 
+import { mapOrder } from '@/utils/adapters'
 
 export default {
   name: 'OrderDetail',
@@ -93,6 +95,7 @@ export default {
     const orderStore = useOrderStore()
     
     const order = ref(null)
+    const loading = ref(false)
     const countdown = ref(0)
     let timer = null
 
@@ -100,20 +103,22 @@ export default {
     const calculateCountdown = () => {
       if (!order.value || order.value.status !== 'pending') return
 
-      const createTime = new Date(order.value.createTime).getTime()
-      const now = Date.now()
-      const timeLimit = 30 * 60 * 1000 // 30分钟支付时限
-      const remainingTime = createTime + timeLimit - now
+      // 使用后端提供的过期时间
+      if (order.value.rawData && order.value.rawData.expire) {
+        const expireTime = new Date(order.value.rawData.expire).getTime()
+        const now = Date.now()
+        const remainingTime = expireTime - now
 
-      if (remainingTime <= 0) {
-        clearInterval(timer)
-        countdown.value = 0
-        // 订单超时，自动取消
-        handleCancelOrder()
-        return
+        if (remainingTime <= 0) {
+          clearInterval(timer)
+          countdown.value = 0
+          // 订单超时，自动取消
+          handleCancelOrder()
+          return
+        }
+
+        countdown.value = remainingTime
       }
-
-      countdown.value = remainingTime
     }
 
     // 格式化倒计时显示
@@ -135,103 +140,37 @@ export default {
 
     // 获取订单详情
     const fetchOrderDetail = async () => {
+      loading.value = true
       const orderId = route.params.id
-      // 这里应该调用实际的API
-      // 暂时使用模拟数据
-      const mockOrders = {
-        '1': {
-          id: '1',
-          orderNo: '20230401001',
-          status: 'pending',
-          totalAmount: 128.00,
-          freight: 10.00,
-          createTime: new Date().toISOString(),
-          items: [
-            {
-              id: 1,
-              title: '时尚休闲连衣裙夏季新款',
-              image: 'https://img01.yzcdn.cn/vant/cat.jpeg',
-              price: 128.00,
-              count: 1
-            }
-          ]
-        },
-        '2': {
-          id: '2',
-          orderNo: '20230401002',
-          status: 'paid',
-          totalAmount: 139.80,
-          freight: 10.00,
-          createTime: '2025-04-08 22:27:00',
-          payTime: '2025-04-08 22:28:00',
-          paymentMethod: '微信支付',
-          items: [
-            {
-              id: 2,
-              title: '简约百搭男士T恤纯棉短袖',
-              image: 'https://img01.yzcdn.cn/vant/cat.jpeg',
-              price: 69.90,
-              count: 2
-            }
-          ]
-        },
-        '3': {
-          id: '3',
-          orderNo: '20230401003',
-          status: 'delivered',
-          totalAmount: 89.00,
-          freight: 10.00,
-          createTime: '2025-04-08 22:27:00',
-          payTime: '2025-04-08 22:28:00',
-          paymentMethod: '支付宝',
-          items: [
-            {
-              id: 3,
-              title: '多功能便携蓝牙音箱户外防水',
-              image: 'https://img01.yzcdn.cn/vant/cat.jpeg',
-              price: 89.00,
-              count: 1
-            }
-          ]
-        },
-        '4': {
-          id: '4',
-          orderNo: '20230401004',
-          status: 'completed',
-          totalAmount: 19.80,
-          freight: 10.00,
-          createTime: '2025-04-08 22:27:00',
-          payTime: '2025-04-08 22:28:00',
-          paymentMethod: '微信支付',
-          items: [
-            {
-              id: 4,
-              title: '简约铝合金手机支架折叠式',
-              image: 'https://img01.yzcdn.cn/vant/cat.jpeg',
-              price: 19.80,
-              count: 1
-            }
-          ]
+      
+      try {
+        // 调用API获取订单详情
+        const response = await getOrderDetail(orderId)
+        
+        if (response && response.data) {
+          // 使用适配器转换格式
+          const mappedOrder = mapOrder(response.data)
+          
+          // 添加收货地址信息
+          mappedOrder.address = {
+            name: response.data.receiver || '收货人',
+            phone: response.data.receiverMobile || '',
+            province: '',
+            city: '',
+            district: '',
+            detail: response.data.receiverAreaName || ''
+          }
+          
+          order.value = mappedOrder
+          startCountdown()
+        } else {
+          Toast('获取订单详情失败')
         }
-      }
-
-      // 所有订单都使用相同的地址
-      const address = {
-        name: '张三',
-        phone: '13800138000',
-        province: '广东省',
-        city: '深圳市',
-        district: '南山区',
-        detail: '科技园南路XX号'
-      }
-
-      // 根据订单ID获取对应的订单数据
-      const orderData = mockOrders[orderId]
-      if (orderData) {
-        order.value = {
-          ...orderData,
-          address
-        }
+      } catch (error) {
+        console.error('获取订单详情失败:', error)
+        Toast('获取订单详情失败')
+      } finally {
+        loading.value = false
       }
     }
     
@@ -397,7 +336,6 @@ export default {
     
     onMounted(() => {
       fetchOrderDetail()
-      startCountdown()
     })
 
     onUnmounted(() => {
@@ -408,6 +346,7 @@ export default {
     
     return {
       order,
+      loading,
       formatCountdown,
       onClickLeft,
       getStatusIcon,

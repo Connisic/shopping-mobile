@@ -44,6 +44,9 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import OrderList from './components/OrderList.vue'
+import { getUserOrders } from '@/services/order'
+import { mapOrders } from '@/utils/adapters'
+import { Toast } from 'vant'
 
 // 模拟订单数据
 const mockOrders = [
@@ -190,14 +193,31 @@ export default {
     const orders = ref([])
     
     // 获取订单数据
-    const fetchOrders = () => {
+    const fetchOrders = async () => {
       loading.value = true
       
-      // 模拟API请求延迟
-      setTimeout(() => {
+      try {
+        // 调用后端API获取订单数据
+        const response = await getUserOrders()
+        
+        // 检查响应数据
+        if (response && response.data && response.data.length > 0) {
+          // 使用后端返回的数据，但先转换格式
+          orders.value = mapOrders(response.data)
+          console.log('使用后端数据(已转换):', orders.value)
+        } else {
+          // 后端没有返回有效数据，使用假数据
+          orders.value = mockOrders
+          console.log('使用假数据:', orders.value)
+        }
+      } catch (error) {
+        console.error('获取订单数据失败:', error)
+        // 请求失败，使用假数据
         orders.value = mockOrders
+        Toast('获取订单数据失败，显示模拟数据')
+      } finally {
         loading.value = false
-      }, 500)
+      }
     }
     
     // 根据状态过滤订单

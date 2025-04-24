@@ -24,15 +24,15 @@ module.exports = defineConfig({
     },
   },
   devServer: {
-    port: 8081,   
+    port: 8083,   
     // 代理服务器
 	proxy: {
-		'/': {
-			target: 'http://localhost:8082/',
-			changeOrigin: true,  
-				// pathRewrite: {
-				//   '^/api': ''  
-				// }
+		'/api': {
+			target: 'http://localhost:8082',
+			changeOrigin: true,
+			pathRewrite: {
+			  // '^/api': ''  // 如果后端API路径不需要/api前缀，则取消注释此行
+			}
 		}
 	}
   }

@@ -3,6 +3,7 @@ import { orderAPI } from '@/services'
 import { Toast } from 'vant'
 import { useCartStore } from './cartStore'
 import { useUserStore } from './userStore'
+import { mapOrders, mapOrder } from '@/utils/adapters'
 
 export const useOrderStore = defineStore('order', {
   state: () => ({
@@ -12,10 +13,10 @@ export const useOrderStore = defineStore('order', {
   
   getters: {
     orderCount: (state) => state.orders.length,
-    // 订单状态 1-未付款 2-已付款 3-未发货 4-已发货 5-交易成功 6-交易关闭 7-待评价
-    pendingPaymentCount: (state) => state.orders.filter(order => order.status === 1).length,
-    pendingDeliveryCount: (state) => state.orders.filter(order => order.status === 2 || order.status === 3).length,
-    pendingReceiveCount: (state) => state.orders.filter(order => order.status === 4).length
+    // 订单状态 'pending'-未付款 'paid'-已付款/待发货 'delivered'-待收货 'completed'-交易成功/待评价 'cancelled'-交易关闭
+    pendingPaymentCount: (state) => state.orders.filter(order => order.status === 'pending').length,
+    pendingDeliveryCount: (state) => state.orders.filter(order => order.status === 'paid').length,
+    pendingReceiveCount: (state) => state.orders.filter(order => order.status === 'delivered').length
   },
   
   actions: {
@@ -46,9 +47,14 @@ export const useOrderStore = defineStore('order', {
     async fetchOrders({ status = null } = {}) {
       try {
         const response = await orderAPI.getUserOrders(status)
-        const orders = response.data
-        this.setOrders(orders)
-        return orders
+        if (response && response.data) {
+          // 使用适配器转换订单数据格式
+          const mappedOrders = mapOrders(response.data)
+          this.setOrders(mappedOrders)
+          return mappedOrders
+        } else {
+          return []
+        }
       } catch (error) {
         console.error('获取订单列表失败：', error)
         Toast('获取订单列表失败')
@@ -60,9 +66,14 @@ export const useOrderStore = defineStore('order', {
     async fetchOrderDetail(id) {
       try {
         const response = await orderAPI.getOrderDetail(id)
-        const order = response.data
-        this.setCurrentOrder(order)
-        return order
+        if (response && response.data) {
+          // 使用适配器转换订单数据格式
+          const mappedOrder = mapOrder(response.data)
+          this.setCurrentOrder(mappedOrder)
+          return mappedOrder
+        } else {
+          return null
+        }
       } catch (error) {
         console.error('获取订单详情失败：', error)
         Toast('获取订单详情失败')

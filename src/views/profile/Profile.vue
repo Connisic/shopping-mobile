@@ -101,7 +101,7 @@
     <!-- 底部导航栏 -->
     <van-tabbar v-model="activeTabbar" route class="custom-tabbar">
       <van-tabbar-item icon="home-o" to="/">首页</van-tabbar-item>
-      <van-tabbar-item icon="chat-o" to="/message">消息</van-tabbar-item>
+      <van-tabbar-item icon="chat-o" to="/messages">消息</van-tabbar-item>
       <van-tabbar-item icon="cart-o" to="/cart">购物车</van-tabbar-item>
       <van-tabbar-item icon="user-o" to="/profile">我的</van-tabbar-item>
     </van-tabbar>

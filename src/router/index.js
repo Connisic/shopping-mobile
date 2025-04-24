@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { isTokenExpired } from '@/utils/auth'
 
 const routes = [
   {
@@ -125,31 +126,27 @@ const router = createRouter({
 
 // 全局路由守卫
 router.beforeEach((to, from, next) => {
-  // 暂时禁用登录校验，全部放行
-  next()
-  
-  /* 原来的登录校验逻辑，暂时注释掉
   // 检查该路由是否需要登录
   if (to.matched.some(record => record.meta.requiresAuth)) {
     // 使用Pinia获取用户状态
     const userStore = useUserStore()
     
-    // 检查用户是否已登录
-    if (!userStore.isLogin) {
-      // 未登录，重定向到登录页
+    // 先检查token是否存在且有效
+    if (!userStore.token || isTokenExpired()) {
+      // token不存在或已过期，清除用户状态并重定向到登录页
+      userStore.clearUser()
       next({
         path: '/login',
         query: { redirect: to.fullPath }
       })
     } else {
-      // 已登录，继续导航
+      // token有效，继续导航
       next()
     }
   } else {
     // 不需要登录，继续导航
     next()
   }
-  */
 })
 
 export default router 

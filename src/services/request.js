@@ -13,11 +13,11 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     // 从localStorage获取token
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('YY_TOKEN')
     
-    // 如果token存在，则添加到请求头
+    // 如果token存在，则添加到请求头，使用Bearer认证方案
     if (token) {
-      config.headers['Authorization'] = token
+      config.headers['Authorization'] = `Bearer ${token}`
     }
     
     // 添加时间戳防止缓存
@@ -49,7 +49,8 @@ service.interceptors.response.use(
       // 401: 未登录或token过期
       if (res.code === 401) {
         // 清除token
-        localStorage.removeItem('token')
+        localStorage.removeItem('YY_TOKEN')
+        localStorage.removeItem('YY_USER_INFO')
         // 跳转到登录页
         router.push('/login')
       }
@@ -70,7 +71,8 @@ service.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           // 清除token
-          localStorage.removeItem('token')
+          localStorage.removeItem('YY_TOKEN')
+          localStorage.removeItem('YY_USER_INFO')
           // 跳转到登录页
           router.push('/login')
           Toast.fail('登录已过期，请重新登录')

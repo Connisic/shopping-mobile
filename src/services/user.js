@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from './request'
 import { API_BASE_URL } from '@/constants'
 
 const userAPI = {
