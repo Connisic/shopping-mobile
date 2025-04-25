@@ -117,5 +117,72 @@ app.use(router)
 // 暴露全局API
 app.config.globalProperties.$theme = ThemeManager;
 
+// 示例：首页数据加载和搜索功能实现
+/*
+import { useSeckillStore, useProductStore, useSearchStore } from './stores'
+
+// 首页数据加载示例
+async function loadHomePageData() {
+  const seckillStore = useSeckillStore()
+  const productStore = useProductStore()
+  
+  try {
+    // 1. 获取秒杀列表展示
+    await seckillStore.fetchSeckillProducts()
+    // API: /user/seckillGoods/findPage (GET)
+    
+    // 2. 获取推荐商品列表
+    await productStore.fetchRecommendProducts()
+    // API: /user/recommend/searchPage (GET)
+    
+    console.log('首页数据加载完成')
+  } catch (error) {
+    console.error('首页数据加载失败', error)
+  }
+}
+
+// 搜索功能示例
+async function handleSearch() {
+  const searchStore = useSearchStore()
+  
+  try {
+    // 1. 输入搜索词调用自动补充，提示词接口
+    const keyword = "搜索内容" // 用户输入的内容
+    const suggestions = await searchStore.getSearchSuggestions(keyword)
+    // API: /user/goodsSearch/autoSuggest (GET)
+    // 参数: keyword
+    console.log('搜索建议', suggestions)
+    
+    // 2. 点击搜索，调用搜索接口
+    const searchResults = await searchStore.search(keyword)
+    // API: /user/goodsSearch/search (POST)
+    // 参数: keyword, page, size 等
+    console.log('搜索结果', searchResults)
+  } catch (error) {
+    console.error('搜索失败', error)
+  }
+}
+
+// 商品详情页示例
+async function viewProductDetail(productId) {
+  const productStore = useProductStore()
+  
+  try {
+    // 3. 点击商品，调用查看商品详情接口
+    await productStore.fetchProductDetail(productId)
+    // API: /user/goodsSearch/findDesc (GET)
+    // 参数: id
+    console.log('商品详情', productStore.currentProduct)
+  } catch (error) {
+    console.error('获取商品详情失败', error)
+  }
+}
+
+// 用法示例
+// loadHomePageData()
+// handleSearch()
+// viewProductDetail(12345)
+*/
+
 // 挂载应用
 app.mount('#app')

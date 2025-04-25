@@ -28,7 +28,7 @@ const routes = [
   {
     path: '/search-results',
     name: 'SearchResults',
-    component: () => import('../views/search/SearchResults.vue')
+    component: () => import('../views/search/SearchResult.vue')
   },
   {
     path: '/product/:id',
